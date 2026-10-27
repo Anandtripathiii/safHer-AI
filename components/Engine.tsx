@@ -6,7 +6,9 @@ import { toast } from "sonner";
 import {
   CHECKIN_REPLY_WINDOW, ESCALATION_SECONDS, FALL_SECONDS, useApp, zonesAt, landmark, notifyNames, alertChain,
 } from "@/lib/store";
-import { pointAt } from "@/lib/simulation";
+import { distM, pointAt } from "@/lib/simulation";
+
+const MINIMIZE_MS = 10_000;
 import { alertChime } from "@/lib/sound";
 
 export default function Engine() {
@@ -36,6 +38,8 @@ export default function Engine() {
       last = now;
       const s = useApp.getState();
 
+      if (s.minimizeAt && now >= s.minimizeAt) s.set({ minimized: !s.sos, minimizeAt: null });
+
       if (s.journey) {
         const j = s.journey;
         const speed = s.demoMode ? 10 : 1;
@@ -49,8 +53,18 @@ export default function Engine() {
           const was = j.zonesInside.includes(z.id), is = inside.includes(z.id);
           if (was === is) continue;
           const msg = is ? `Anand reached ${z.name} ✓` : `Anand left ${z.name}`;
-          toast(msg, { description: `Auto-update sent to ${notified.join(", ") || "your contacts"}` });
           s.log({ type: "zone", title: is ? `Reached ${z.name}` : `Left ${z.name}`, detail: `Auto-update: “${msg}”`, status: "completed", notified });
+          // Minimise only when this safe place is where she's going, not when passing through it.
+          const isDestination = distM(z.pos, landmark(j.toId).pos) <= z.radius;
+          if (is && isDestination && !s.sos) {
+            s.set({ minimizeAt: now + MINIMIZE_MS });
+            toast(`You've reached ${z.name} — SafeHer will minimize in 10s to save battery`, { description: `Auto-update sent to ${notified.join(", ") || "your contacts"}`, duration: MINIMIZE_MS });
+          } else if (!is && (s.minimized || s.minimizeAt)) {
+            s.set({ minimized: false, minimizeAt: null });
+            toast.warning(`You left ${z.name} — SafeHer is active`);
+          } else {
+            toast(msg, { description: `Auto-update sent to ${notified.join(", ") || "your contacts"}` });
+          }
         }
 
         let next = { ...j, progress, zonesInside: inside };
