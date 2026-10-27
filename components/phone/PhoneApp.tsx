@@ -6,6 +6,8 @@ import { usePhone, favouriteContacts, type Tab } from "@/lib/phone-state";
 import { cn } from "@/lib/utils";
 import StatusBar from "../StatusBar";
 import HomeScreen from "./HomeScreen";
+import MapScreen from "./MapScreen";
+import { LocationPrompt, PhoneToast, Springboard } from "./PhoneSystem";
 
 const TABS: { id: Tab; label: string; icon: typeof Home }[] = [
   { id: "home", label: "Home", icon: Home },
@@ -15,7 +17,7 @@ const TABS: { id: Tab; label: string; icon: typeof Home }[] = [
   { id: "profile", label: "Profile", icon: UserRound },
 ];
 
-const SCREENS: Partial<Record<Tab, () => JSX.Element>> = { home: HomeScreen };
+const SCREENS: Partial<Record<Tab, () => JSX.Element>> = { home: HomeScreen, map: MapScreen };
 
 function TabBar() {
   const { tab, set, favourites, say } = usePhone();
@@ -88,6 +90,9 @@ export default function PhoneApp() {
         {Screen ? <Screen /> : <div className="p-5 text-muted">Loading…</div>}
       </main>
       <TabBar />
+      <PhoneToast />
+      <LocationPrompt />
+      <Springboard />
     </>
   );
 }
