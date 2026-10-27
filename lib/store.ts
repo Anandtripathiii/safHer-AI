@@ -103,7 +103,7 @@ const initial = (): State => {
     lang: "en",
     theme: "light",
     demoMode: false,
-    safeWord: "blue umbrella",
+    safeWord: "pineapple", // default until she sets her own in Settings
     fallDetection: false,
     weakNetwork: false,
     fakeCaller: "Mom",

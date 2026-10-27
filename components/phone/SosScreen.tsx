@@ -30,6 +30,7 @@ export default function SosScreen() {
   const s = usePhone();
   const now = useNow(1000);
   const coord = usePhoneCoordination();
+  const safeWord = useApp((x) => x.safeWord);
   const hold = useHold(() => s.fireSOS("Hold-to-confirm"));
   const spokenFor = useRef<number | null>(null);
 
@@ -93,6 +94,7 @@ export default function SosScreen() {
       {s.battery < 10 && <p className="mb-3 flex w-full items-center gap-2 rounded-2xl bg-danger px-4 py-3 text-[15px] font-bold"><BatteryWarning size={22} />Critical battery — your last location will auto-send</p>}
       <h2 className="text-center text-[24px] font-bold leading-tight">Press and hold<br />for 2 seconds</h2>
       <p className="mt-2 text-center text-[15px] text-white/60">Release to cancel</p>
+      <p className="mt-3 rounded-full bg-white/10 px-4 py-2 text-[15px] font-semibold">Listening for: “{safeWord}”</p>
       <div className="relative mt-6 grid h-[288px] w-[288px] place-items-center">
         <svg width="288" height="288" className="absolute -rotate-90" aria-hidden>
           <circle cx="144" cy="144" r={r} fill="none" stroke="rgb(255 255 255 / .08)" strokeWidth="12" />

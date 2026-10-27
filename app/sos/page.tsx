@@ -10,8 +10,8 @@ import { fmtClock } from "@/lib/utils";
 import { Waveform } from "@/components/Overlays";
 import { useCoordination, StatusPill } from "@/components/Coordination";
 import { useT } from "@/lib/i18n";
+import { useSafeWordListener } from "@/lib/voice";
 
-type Recognition = { continuous: boolean; interimResults: boolean; lang: string; start(): void; stop(): void; onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null; onend: (() => void) | null; onerror: ((e: { error: string }) => void) | null };
 
 export default function SosPage() {
   const { sos, safeWord, fireSOS, resolveSOS } = useApp();
@@ -20,8 +20,7 @@ export default function SosPage() {
   const tr = useT();
   const hold = useHold(() => fireSOS("Hold-to-confirm button"));
   const [shakeOn, setShakeOn] = useState(false);
-  const [voiceOn, setVoiceOn] = useState(false);
-  const [heard, setHeard] = useState("");
+  const [voiceOn, setVoiceOn] = useState(true);
 
   // Shake: three hard jolts within 1.5 seconds.
   useEffect(() => {
@@ -49,27 +48,13 @@ export default function SosPage() {
     toast.success("Shake-to-SOS is on", { description: "Shake your phone hard three times." });
   };
 
-  // Voice: listen for "help me" or the safe word while this screen is open.
+  // Voice: listens in the background for the user's private safe word (Settings → Your safe word).
+  const voice = useSafeWordListener(voiceOn && !sos, safeWord, () => fireSOS("Voice — safe word heard"));
+  const heard = voice.heard;
   useEffect(() => {
-    if (!voiceOn) return;
-    const W = window as unknown as { SpeechRecognition?: new () => Recognition; webkitSpeechRecognition?: new () => Recognition };
-    const SR = W.SpeechRecognition ?? W.webkitSpeechRecognition;
-    if (!SR) { toast("Voice SOS needs Chrome or Edge", { description: "Your browser doesn't support speech recognition." }); setVoiceOn(false); return; }
-    const rec = new SR();
-    rec.continuous = true;
-    rec.interimResults = true;
-    rec.lang = "en-IN";
-    let alive = true;
-    rec.onresult = (e) => {
-      const text = Array.from(e.results).map((r) => r[0].transcript).join(" ").toLowerCase();
-      setHeard(text.slice(-60));
-      if (text.includes("help me") || (safeWord && text.includes(safeWord.toLowerCase()))) { alive = false; rec.stop(); setVoiceOn(false); fireSOS("Voice — trigger phrase heard"); }
-    };
-    rec.onerror = (e) => { if (e.error === "not-allowed") { alive = false; setVoiceOn(false); toast.error("Microphone access was declined"); } };
-    rec.onend = () => { if (alive) try { rec.start(); } catch {} };
-    try { rec.start(); } catch {}
-    return () => { alive = false; rec.stop(); };
-  }, [voiceOn, safeWord, fireSOS]);
+    if (voice.status === "unsupported") toast("Voice SOS needs Chrome or Edge", { description: "Your browser doesn't support speech recognition." });
+    if (voice.status === "blocked") toast.error("Microphone access was declined");
+  }, [voice.status]);
 
   const r = 118, c = 2 * Math.PI * r;
 
@@ -80,6 +65,9 @@ export default function SosPage() {
           <>
             <h1 className="text-center text-2xl font-semibold">{tr("holdSos")}</h1>
             <p className="mt-2 text-center text-sm text-white/60">Your trusted contacts get your live location. Release to cancel.</p>
+            {voiceOn && voice.status === "listening" && (
+              <p className="mt-3 flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-semibold"><Mic size={16} className="text-danger" />Listening for: “{safeWord}”</p>
+            )}
 
             <div className="relative mt-10 grid h-[272px] w-[272px] place-items-center">
               <motion.span className="absolute inset-6 rounded-full bg-danger/25" animate={{ scale: [1, 1.12, 1], opacity: [0.6, 0, 0.6] }} transition={{ duration: 2.2, repeat: Infinity, ease: "easeOut" }} />
@@ -120,9 +108,9 @@ export default function SosPage() {
                 {voiceOn ? <Mic size={20} className="text-danger" /> : <MicOff size={20} className="text-pink-soft" />}
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium">Voice SOS</p>
-                  <p className="truncate text-xs text-white/50">{voiceOn ? (heard ? `Heard: “${heard}”` : `Say “help me” or “${safeWord}”`) : "Off · mic only used on this screen"}</p>
+                  <p className="truncate text-xs text-white/50">{voiceOn ? (voice.status === "listening" ? `Listening for: “${safeWord}”${heard ? ` · heard “${heard}”` : ""}` : voice.status === "blocked" ? "Microphone blocked — allow it to use voice SOS" : voice.status === "unsupported" ? "Needs Chrome or Edge" : "Starting…") : "Off · mic only used on this screen"}</p>
                 </div>
-                {voiceOn && <Waveform bars={8} className="h-5 text-danger" />}
+                {voice.status === "listening" && <Waveform bars={8} className="h-5 text-danger" />}
                 <button onClick={() => setVoiceOn(!voiceOn)} className="rounded-full border border-white/20 px-3 py-1.5 text-xs">{voiceOn ? "Stop" : "Listen"}</button>
               </div>
               <div className="flex items-center gap-3 rounded-2xl bg-white/[0.06] p-4 text-sm">

@@ -229,9 +229,9 @@ export const QA_PAIRS: QA[] = [
     id: "sos",
     keywords: { en: ["sos", "how does", "panic", "trigger"], hi: ["sos", "एसओएस", "कैसे"], bn: ["sos", "এসওএস", "কিভাবে"] },
     a: {
-      en: "Hold the SOS button for 2 seconds, shake your phone, say “help me”, or press Ctrl+Shift+S. Your trusted contacts get your live location, and if someone doesn't respond in 20 seconds we escalate to the next person.",
-      hi: "SOS बटन 2 सेकंड दबाकर रखें, फ़ोन हिलाएँ, “help me” बोलें या Ctrl+Shift+S दबाएँ। आपके भरोसेमंद लोगों को लाइव लोकेशन मिलती है, और 20 सेकंड में जवाब न मिले तो अगले व्यक्ति तक बात पहुँचती है।",
-      bn: "SOS বোতাম 2 সেকেন্ড চেপে ধরুন, ফোন ঝাঁকান, “help me” বলুন বা Ctrl+Shift+S চাপুন। আপনার বিশ্বস্তরা লাইভ লোকেশন পান, আর 20 সেকেন্ডে কেউ সাড়া না দিলে পরের জনকে জানানো হয়।",
+      en: "Hold the SOS button for 2 seconds, shake your phone, say your safe word, or press Ctrl+Shift+S. Your trusted contacts get your live location, and if someone doesn't respond in 20 seconds we escalate to the next person.",
+      hi: "SOS बटन 2 सेकंड दबाकर रखें, फ़ोन हिलाएँ, अपना सेफ वर्ड बोलें या Ctrl+Shift+S दबाएँ। आपके भरोसेमंद लोगों को लाइव लोकेशन मिलती है, और 20 सेकंड में जवाब न मिले तो अगले व्यक्ति तक बात पहुँचती है।",
+      bn: "SOS বোতাম 2 সেকেন্ড চেপে ধরুন, ফোন ঝাঁকান, আপনার সেফ ওয়ার্ড বলুন বা Ctrl+Shift+S চাপুন। আপনার বিশ্বস্তরা লাইভ লোকেশন পান, আর 20 সেকেন্ডে কেউ সাড়া না দিলে পরের জনকে জানানো হয়।",
     },
   },
   {
@@ -263,11 +263,11 @@ export const QA_PAIRS: QA[] = [
   },
   {
     id: "voice",
-    keywords: { en: ["voice", "speak", "listen", "help me"], hi: ["आवाज़", "बोल"], bn: ["ভয়েস", "কণ্ঠ", "বল"] },
+    keywords: { en: ["voice", "speak", "listen", "say"], hi: ["आवाज़", "बोल"], bn: ["ভয়েস", "কণ্ঠ", "বল"] },
     a: {
-      en: "Turn on Voice SOS on the SOS screen. While it's listening, saying “help me” or your safe word sends an alert. Listening only happens while that screen is open.",
-      hi: "SOS स्क्रीन पर वॉइस SOS चालू करें। सुनते समय “help me” या आपका सेफ वर्ड बोलने पर अलर्ट चला जाता है। यह सिर्फ़ तभी सुनता है जब वह स्क्रीन खुली हो।",
-      bn: "SOS স্ক্রিনে ভয়েস SOS চালু করুন। শোনার সময় “help me” বা আপনার সেফ ওয়ার্ড বললেই সতর্কবার্তা যায়। শুধু ওই স্ক্রিন খোলা থাকলেই এটি শোনে।",
+      en: "The SOS screen listens for your safe word as soon as it opens (“Listening for: …”). Saying it anywhere in a sentence sends a full SOS. Set your own private word in Settings. Listening only happens while that screen is open.",
+      hi: "SOS स्क्रीन खुलते ही आपका सेफ वर्ड सुनने लगती है। उसे बोलते ही पूरा SOS चला जाता है। अपना निजी शब्द सेटिंग्स में रखें। यह सिर्फ़ तभी सुनता है जब वह स्क्रीन खुली हो।",
+      bn: "SOS স্ক্রিন খুললেই আপনার সেফ ওয়ার্ড শুনতে শুরু করে। সেটি বললেই পুরো SOS চলে যায়। নিজের গোপন শব্দ সেটিংসে রাখুন। শুধু ওই স্ক্রিন খোলা থাকলেই এটি শোনে।",
     },
   },
   {

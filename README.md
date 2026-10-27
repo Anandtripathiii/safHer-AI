@@ -54,7 +54,7 @@ Turn on **Demo mode** (top-right switch, or `Ctrl+Shift+D`) before presenting:
 | `/` | Calm landing page and onboarding, with a "Try the 2-minute demo" button |
 | `/journey` | Safe Journey Mode: From/To autocomplete over 21 Delhi NCR landmarks, expected arrival, who to notify, progress bar, check-ins every 2 minutes, "Simulate fall" |
 | `/map` | Live blue dot, "Shared with" viewers with live "last viewed" times, auto-stop countdown, Stop sharing, Fastest vs Safer routes with a score breakdown, 15 help points, safe-zone circles, live coordination feed during an SOS |
-| `/sos` | Dark screen with a 2-second press-and-hold button and countdown ring, Shake-to-SOS plus "Simulate shake", and Voice SOS ("help me" or your safe word) |
+| `/sos` | Dark screen with a 2-second press-and-hold button and countdown ring, Shake-to-SOS plus "Simulate shake", and Voice SOS that starts listening on open ("Listening for: …" your safe word, default `pineapple`) |
 | `/assistant` | Chat in English, हिन्दी and বাংলা: 12 scripted Q&A pairs, keyword-matched, with a typing delay and quick-reply chips |
 | `/dashboard` | Overview cards, live timeline, delivery rates for SMS, Push and In-app, a Weak network toggle, and "Cancel false alarm" |
 | `/contacts` | Add, edit and remove trusted contacts, and mark escalation contacts |

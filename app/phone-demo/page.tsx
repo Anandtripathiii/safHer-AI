@@ -6,9 +6,14 @@ import PhoneApp from "@/components/phone/PhoneApp";
 import PhoneEngine from "@/components/phone/PhoneEngine";
 import JudgeControls from "@/components/JudgeControls";
 import WatcherPhone from "@/components/phone/WatcherPhone";
+import { useApp } from "@/lib/store";
+import { useSafeWordListener } from "@/lib/voice";
 
 export default function PhoneDemoPage() {
-  const { osDark, pulse, fireSOS } = usePhone();
+  const { osDark, pulse, fireSOS, sos } = usePhone();
+  const safeWord = useApp((s) => s.safeWord);
+  // The phone listens in the background too: saying the safe word fires a full SOS.
+  useSafeWordListener(!sos, safeWord, () => fireSOS("Safe word heard"));
   useEffect(() => {
     usePhone.persist.rehydrate();
   }, []);

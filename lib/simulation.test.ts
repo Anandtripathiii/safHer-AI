@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { CONTACTS, ROUTE_WAYPOINTS } from "./seed.ts";
 import { matchQA } from "./assistant.ts";
 import { calculate } from "./calc.ts";
+import { heardSafeWord } from "./voice.ts";
 import { routeScores, routesFor } from "./simulation.ts";
 import { coordinationAt, coordinationScript, pointAt, NO_RESPONSE_AFTER } from "./simulation.ts";
 
@@ -47,4 +48,9 @@ assert.ok(routeScores("fastest", true, 12).warning);
 assert.equal(routeScores("fastest", false, 12).warning, undefined);
 assert.equal(routeScores("safer", true, 12).minutes, 15);
 assert.equal(routesFor([0, 0], [1, 1]).fastest.length, 3);
+// safe word: case-insensitive, anywhere in the sentence; never fires on an empty word
+assert.ok(heardSafeWord("ok so I want a PINEAPPLE juice", "pineapple"));
+assert.ok(heardSafeWord("call me on the blue umbrella line", "Blue Umbrella"));
+assert.ok(!heardSafeWord("help me", "pineapple"));
+assert.ok(!heardSafeWord("anything", "   "));
 console.log("simulation tests passed");

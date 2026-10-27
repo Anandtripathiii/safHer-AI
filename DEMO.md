@@ -45,7 +45,7 @@ Also point out the "Shared with" list ("last viewed 4s ago", updating live), the
 
 ### 1:55 – 2:10 · Resolve + evidence
 - Click **I'm safe now** in the red bar. A toast says the recording was saved.
-- Open **History** from the avatar menu. The new recording is a **locked** card. Click **Unlock with safe word**, type `blue umbrella`, and the waveform appears.
+- Open **History** from the avatar menu. The new recording is a **locked** card. Click **Unlock with safe word**, type `pineapple` (the default safe word — or whatever you set in Settings), and the waveform appears.
 
 ### 2:10 – 2:30 · Fast extras (pick two)
 - **Dashboard:** flip **Weak network** on. Push and In-app drop to 41% and 22%, SMS takes over, and the queued-messages notice appears.

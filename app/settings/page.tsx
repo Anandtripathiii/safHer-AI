@@ -60,8 +60,8 @@ export default function SettingsPage() {
       <div className="mt-6 divide-y divide-line/70">
         <Group title="Safety" desc="How SafeHer listens for trouble.">
           <div>
-            <label htmlFor="sw" className="text-[15px] font-medium">Safe word</label>
-            <p className="text-sm text-muted">Say it with Voice SOS on to send an alert. Also unlocks your Evidence Vault.</p>
+            <label htmlFor="sw" className="text-[15px] font-medium">Your safe word</label>
+            <p className="text-sm text-muted">Any private word or phrase. SafeHer listens for it on the SOS screen and the phone demo, and saying it sends a full SOS. It also unlocks your Evidence Vault.</p>
             <form className="mt-2 flex gap-2" onSubmit={(e) => { e.preventDefault(); saveWord(); }}>
               <input id="sw" className="input" value={word} onChange={(e) => setWord(e.target.value)} />
               <button className="btn-secondary shrink-0" disabled={word.trim() === s.safeWord}>Save</button>
@@ -138,7 +138,7 @@ export default function SettingsPage() {
               if (!confirmReset) { setConfirmReset(true); setTimeout(() => setConfirmReset(false), 4000); return; }
               s.reset();
               usePhone.getState().reset(); // phone favourites change who an SOS alerts, so they reset too
-              setWord("blue umbrella");
+              setWord("pineapple");
               setConfirmReset(false);
               toast.success("Demo data reset", { description: "Contacts, history and reports are back to the sample set." });
             }}
