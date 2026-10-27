@@ -27,6 +27,7 @@ export type SafeEvent = {
   detail: string;
   status: EventStatus;
   notified: string[];
+  battery?: number; // % at the moment an SOS fired, for the police report
 };
 
 export type Tone = "negative" | "positive" | "neutral";
@@ -158,10 +159,10 @@ export function seedEvents(now: number): SafeEvent[] {
     { id: "e2", ts: now - 5 * H, type: "checkin", title: "Check-in answered", detail: "Replied “I'm safe” in 4s", status: "completed", notified: [] },
     { id: "e3", ts: now - 3 * D, type: "alert", title: "Long stop near Nehru Place", detail: "Risk 34 · marked as false alarm (traffic jam)", status: "false-alarm", notified: [] },
     { id: "e4", ts: now - 6 * D, type: "journey", title: "Saket → GK-1 M-Block Market", detail: "Arrived 3 min late · 2 check-ins", status: "completed", notified: ["Mom", "Priya"] },
-    { id: "e5", ts: now - 12 * D, type: "sos", title: "SOS — shake gesture", detail: "Mom acknowledged in 48s · resolved by user", status: "resolved", notified: ["Mom", "Dad", "Priya"] },
+    { id: "e5", ts: now - 12 * D, type: "sos", title: "SOS — shake gesture", detail: "Mom acknowledged in 48s · resolved by user", status: "resolved", notified: ["Mom", "Dad", "Priya"], battery: 64 },
     { id: "e6", ts: now - 19 * D, type: "zone", title: "Reached Hostel", detail: "Auto-update sent to trusted contacts", status: "completed", notified: ["Mom", "Dad"] },
     { id: "e7", ts: now - 27 * D, type: "alert", title: "Route deviation on Outer Ring Road", detail: "Risk 61 · user replied “I'm safe”", status: "resolved", notified: [] },
-    { id: "e8", ts: now - 38 * D, type: "sos", title: "SOS — missed check-in", detail: "Priya didn't respond · escalated to Campus Security", status: "escalated", notified: ["Mom", "Dad", "Priya", "Campus Security"] },
+    { id: "e8", ts: now - 38 * D, type: "sos", title: "SOS — missed check-in", detail: "Priya didn't respond · escalated to Campus Security", status: "escalated", notified: ["Mom", "Dad", "Priya", "Campus Security"], battery: 23 },
     { id: "e9", ts: now - 51 * D, type: "journey", title: "Rajiv Chowk Metro → Khan Market", detail: "Arrived on time · 22 min", status: "completed", notified: ["Dad"] },
     { id: "e10", ts: now - 64 * D, type: "fall", title: "Possible fall detected", detail: "Answered “I'm okay” in 6s", status: "cancelled", notified: [] },
   ];
