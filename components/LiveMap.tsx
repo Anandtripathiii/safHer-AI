@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Circle, MapContainer, Marker, Polyline, Popup, TileLayer, Tooltip, useMap } from "react-leaflet";
 import L from "leaflet";
+import "leaflet/dist/leaflet.css"; // loaded with the map chunk, not on every page
 import { Flag } from "lucide-react";
 import { HELP_KINDS } from "./helpKinds";
 import { HELP_POINTS, type HelpKind, type LatLng, type SafeZone } from "@/lib/seed";

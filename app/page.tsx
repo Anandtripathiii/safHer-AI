@@ -1,7 +1,6 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
 import { ArrowRight, BellRing, Route, UsersRound } from "lucide-react";
 import { useApp } from "@/lib/store";
 import LocationPill from "@/components/LocationPill";
@@ -50,7 +49,8 @@ export default function Landing() {
   return (
     <main className="mx-auto max-w-5xl px-5 pb-36 pt-32 md:pb-24 md:pt-40">
       <section className="grid items-center gap-12 md:grid-cols-[1.15fr_1fr]">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, ease: "easeOut" }}>
+        {/* Plain render: no JS-driven fade, so the headline paints immediately on slow phones. */}
+        <div>
           <div className="flex flex-wrap items-center gap-3">
             <Logo className="text-[28px]" />
             <p className="text-sm font-medium text-pink-strong">Good evening, Anand</p>
@@ -74,10 +74,10 @@ export default function Landing() {
             </div>
             <p className="text-sm text-muted">{contacts.length} trusted contacts on standby</p>
           </div>
-        </motion.div>
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25, delay: 0.1 }} className="flex justify-center">
+        </div>
+        <div className="flex justify-center">
           <Illustration />
-        </motion.div>
+        </div>
       </section>
 
       <section className="mt-28 md:mt-36">
