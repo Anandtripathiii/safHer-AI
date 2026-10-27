@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Design tokens as RGB channels so Tailwind opacity modifiers work (bg-pink-strong/20). */
+:root {
+  --bg: 242 249 255;          /* #F2F9FF */
+  --surface: 255 255 255;     /* #FFFFFF */
+  --pink-soft: 255 204 225;   /* #FFCCE1 */
+  --pink-strong: 225 149 171; /* #E195AB */
+  --danger: 217 55 92;        /* #D9375C */
+  --success: 76 175 139;      /* #4CAF8B */
+  --warning: 242 178 61;      /* #F2B23D */
+  --text: 31 26 43;           /* #1F1A2B */
+  --muted: 107 100 120;       /* #6B6478 */
+  --line: 230 234 242;
+  color-scheme: light;
+}
+.dark {
+  --bg: 17 15 25;
+  --surface: 29 26 39;
+  --pink-soft: 78 46 64;
+  --pink-strong: 232 160 182;
+  --danger: 230 72 108;
+  --success: 92 190 154;
+  --warning: 242 184 77;
+  --text: 241 237 246;
+  --muted: 163 155 178;
+  --line: 52 48 66;
+  color-scheme: dark;
+}
+
+html, body { background: rgb(var(--bg)); color: rgb(var(--text)); }
+body { font-size: 15px; -webkit-font-smoothing: antialiased; }
+@media (min-width: 768px) { body { font-size: 16px; } }
+
+.card { @apply rounded-card bg-surface shadow-sm border border-line/70; }
+.btn { @apply inline-flex items-center justify-center gap-2 rounded-full px-5 h-11 text-[15px] font-medium transition duration-200 ease-out disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-strong focus-visible:ring-offset-2 focus-visible:ring-offset-bg; }
+.btn-primary { @apply btn bg-pink-strong text-white hover:shadow-md hover:brightness-95; }
+.btn-secondary { @apply btn bg-surface text-ink border border-pink-strong hover:bg-pink-soft/50; }
+.btn-ghost { @apply btn text-ink hover:bg-pink-soft/50; }
+.btn-danger { @apply btn bg-danger text-white hover:shadow-md hover:brightness-95; }
+.chip { @apply inline-flex items-center gap-1.5 rounded-full px-3 h-8 text-sm bg-pink-soft/60 text-ink transition hover:bg-pink-soft; }
+.input { @apply w-full h-11 rounded-xl border border-line bg-surface px-3.5 text-[15px] text-ink placeholder:text-muted/70 outline-none focus:border-pink-strong focus:ring-2 focus:ring-pink-strong/25; }
+.label { @apply text-sm font-medium text-muted; }
+
+.dark .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9); }
+.leaflet-container { font-family: inherit; background: rgb(var(--bg)); }
+.leaflet-div-icon { background: transparent; border: 0; }
+
+@keyframes ping-soft { 0% { transform: scale(1); opacity: .6 } 100% { transform: scale(2.6); opacity: 0 } }
+.me-dot { position: relative; width: 18px; height: 18px; border-radius: 9999px; background: #2F7BF6; border: 3px solid #fff; box-shadow: 0 1px 4px rgb(0 0 0 / .3); }
+.me-dot::after { content: ""; position: absolute; inset: -3px; border-radius: 9999px; background: #2F7BF6; animation: ping-soft 1.8s ease-out infinite; z-index: -1; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+@keyframes in-right { from { transform: translateX(100%) } to { transform: none } }
+@keyframes in-bottom { from { transform: translateY(100%) } to { transform: none } }
+.sheet-in-right[data-state="open"] { animation: in-right 220ms ease-out; }
+.sheet-in-bottom[data-state="open"] { animation: in-bottom 220ms ease-out; }
