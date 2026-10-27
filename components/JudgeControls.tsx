@@ -1,5 +1,5 @@
 "use client";
-import { BatteryMedium, MapPin, Moon, Signal, Sun } from "lucide-react";
+import { BatteryMedium, KeyRound, MapPin, Moon, Signal, Sun } from "lucide-react";
 import { usePhone, type Network } from "@/lib/phone-state";
 import { TELEPORTS, type TeleportKey } from "@/lib/seed";
 import { distM } from "@/lib/simulation";
@@ -72,6 +72,16 @@ function TimeGroup() {
   );
 }
 
+function PermissionsGroup() {
+  const { locPerm, contactsPerm, resetPermissions, say } = usePhone();
+  return (
+    <Group icon={KeyRound} title="Permissions">
+      <p className="text-sm">Location: <b>{locPerm}</b> · Contacts: <b>{contactsPerm}</b></p>
+      <button onClick={() => { resetPermissions(); say("Permissions reset — prompts will show again", "info"); }} className={cn(seg(false), "mt-2 w-full")}>Reset all prompts</button>
+    </Group>
+  );
+}
+
 /** Right-hand panel on /phone-demo: every simulated state, grouped. */
 export default function JudgeControls() {
   return (
@@ -84,6 +94,7 @@ export default function JudgeControls() {
       <LocationGroup />
       <NetworkGroup />
       <TimeGroup />
+      <PermissionsGroup />
     </aside>
   );
 }
