@@ -1,6 +1,8 @@
 "use client";
-import { BatteryMedium } from "lucide-react";
+import { BatteryMedium, MapPin } from "lucide-react";
 import { usePhone } from "@/lib/phone-state";
+import { TELEPORTS, type TeleportKey } from "@/lib/seed";
+import { distM } from "@/lib/simulation";
 import { cn } from "@/lib/utils";
 
 function Group({ icon: I, title, children }: { icon: typeof BatteryMedium; title: string; children: React.ReactNode }) {
@@ -27,6 +29,25 @@ function BatteryGroup() {
   );
 }
 
+function LocationGroup() {
+  const { here, journey, teleport } = usePhone();
+  const keys = Object.keys(TELEPORTS) as TeleportKey[];
+  const current = journey ? "" : keys.find((k) => distM(TELEPORTS[k].pos, here) < 30) ?? "";
+  return (
+    <Group icon={MapPin} title="Location">
+      <select value={current} onChange={(e) => e.target.value && teleport(e.target.value as TeleportKey)} aria-label="Teleport phone to" className="input h-10 text-sm">
+        <option value="">{journey ? "Moving along a journey…" : "Choose a place…"}</option>
+        {keys.map((k) => <option key={k} value={k}>{TELEPORTS[k].label} — {TELEPORTS[k].note}</option>)}
+      </select>
+      <div className="mt-2 grid grid-cols-2 gap-1.5">
+        {(["home", "college", "market", "metro"] as TeleportKey[]).map((k) => (
+          <button key={k} onClick={() => teleport(k)} className={seg(current === k)}>Teleport to {TELEPORTS[k].label}</button>
+        ))}
+      </div>
+    </Group>
+  );
+}
+
 /** Right-hand panel on /phone-demo: every simulated state, grouped. */
 export default function JudgeControls() {
   return (
@@ -36,6 +57,7 @@ export default function JudgeControls() {
         <p className="text-sm text-muted">Change the phone's world. Everything is simulated.</p>
       </div>
       <BatteryGroup />
+      <LocationGroup />
     </aside>
   );
 }
