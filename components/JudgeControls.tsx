@@ -1,6 +1,6 @@
 "use client";
-import { BatteryMedium, MapPin } from "lucide-react";
-import { usePhone } from "@/lib/phone-state";
+import { BatteryMedium, MapPin, Signal } from "lucide-react";
+import { usePhone, type Network } from "@/lib/phone-state";
 import { TELEPORTS, type TeleportKey } from "@/lib/seed";
 import { distM } from "@/lib/simulation";
 import { cn } from "@/lib/utils";
@@ -48,6 +48,17 @@ function LocationGroup() {
   );
 }
 
+function NetworkGroup() {
+  const { network, set } = usePhone();
+  const opts: [Network, string][] = [["5G", "5G"], ["3G", "3G"], ["none", "No signal"]];
+  return (
+    <Group icon={Signal} title="Network">
+      <div className="flex gap-1.5">{opts.map(([v, l]) => <button key={v} onClick={() => set({ network: v })} className={seg(network === v)}>{l}</button>)}</div>
+      <p className="mt-1 text-xs text-muted">{network === "5G" ? "Alerts go out by push instantly." : network === "3G" ? "Push is slow — SOS falls back to SMS." : "Alerts queue and send by SMS as soon as any bar returns."}</p>
+    </Group>
+  );
+}
+
 /** Right-hand panel on /phone-demo: every simulated state, grouped. */
 export default function JudgeControls() {
   return (
@@ -58,6 +69,7 @@ export default function JudgeControls() {
       </div>
       <BatteryGroup />
       <LocationGroup />
+      <NetworkGroup />
     </aside>
   );
 }
