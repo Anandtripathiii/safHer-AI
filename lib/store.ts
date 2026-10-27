@@ -201,7 +201,11 @@ export const useApp = create<State & Actions>()(
           sharing: get().sharing ?? { startedAt: now, minutes: SHARE_MINUTES },
           risk: null, checkin: null, fall: null, minimized: false, minimizeAt: null,
         });
-        get().log({ type: "sos", title: `SOS — ${source}`, detail: "Alert in progress · recording started", status: "active", notified: contacts.filter((c) => !c.escalation).map((c) => c.name) });
+        const evId = get().log({ type: "sos", title: `SOS — ${source}`, detail: "Alert in progress · recording started", status: "active", notified: contacts.filter((c) => !c.escalation).map((c) => c.name), battery: usePhone.getState().battery });
+        // Prefer the real device battery when the browser exposes it.
+        (navigator as Navigator & { getBattery?: () => Promise<{ level: number }> }).getBattery?.()
+          .then((b) => get().updateEvent(evId, { battery: Math.round(b.level * 100) }))
+          .catch(() => {});
       },
 
       resolveSOS: (falseAlarm) => {
