@@ -37,7 +37,8 @@ export default function StatusBar({ light, onPull }: { light?: boolean; onPull?:
       aria-label="Open notifications"
       className={cn("relative z-[60] flex h-[50px] w-full shrink-0 items-center justify-between px-8 pt-3 text-[15px] font-semibold", light ? "text-white" : "text-ink")}
     >
-      <span className="flex w-20 items-center gap-1 tabular-nums">
+      {/* The clock differs from the build-time HTML by design; it re-renders every second. */}
+      <span className="flex w-20 items-center gap-1 tabular-nums" suppressHydrationWarning>
         {istTime(now)}
         {(locPerm === "once" || locPerm === "while") && <Navigation size={11} className="fill-current" />}
       </span>
