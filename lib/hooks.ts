@@ -11,6 +11,17 @@ export function useNow(ms = 1000) {
   return now;
 }
 
+/**
+ * False during the server render and the first client render, true after mount.
+ * Pages are pre-rendered at build time on a UTC machine, so anything that depends on
+ * the visitor's clock (e.g. "is it night?") must wait for this to avoid a hydration mismatch.
+ */
+export function useMounted() {
+  const [m, setM] = useState(false);
+  useEffect(() => setM(true), []);
+  return m;
+}
+
 /** Press-and-hold: `p` goes 0→1 over `ms`, then `onDone` fires. Releasing early resets it. */
 export function useHold(onDone: () => void, ms = 2000) {
   const [p, setP] = useState(0);
