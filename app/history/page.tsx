@@ -8,6 +8,7 @@ import type { EventType, SafeEvent } from "@/lib/seed";
 import { TYPE_ICON, TYPE_TINT } from "@/components/eventMeta";
 import { Waveform } from "@/components/Overlays";
 import { cn, fmtClock, fmtDate, fmtTime } from "@/lib/utils";
+import { useMounted } from "@/lib/hooks";
 
 const TYPES: { id: EventType | "all"; label: string }[] = [
   { id: "all", label: "All" },
@@ -31,6 +32,9 @@ const monthKey = (ts: number) => new Date(ts).toLocaleDateString("en-IN", { mont
 export default function HistoryPage() {
   const { events, evidence, safeWord, contacts, weakNetwork } = useApp();
   const [making, setMaking] = useState<string | null>(null);
+  // Absolute times depend on the visitor's clock and timezone; the page was pre-rendered on a UTC machine.
+  const mounted = useMounted();
+  const when = (ts: number, sep: string) => (mounted ? `${fmtDate(ts)}${sep}${fmtTime(ts)}` : "");
 
   const policeReport = async (e: SafeEvent) => {
     setMaking(e.id);
@@ -81,7 +85,7 @@ export default function HistoryPage() {
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium">Audio · {fmtClock(ev.durationSec)}</p>
-                    <p className={cn("truncate text-xs", isOpen ? "text-muted" : "text-white/60")}>{fmtDate(ev.ts)}, {fmtTime(ev.ts)} · {ev.source}</p>
+                    <p className={cn("truncate text-xs", isOpen ? "text-muted" : "text-white/60")}>{when(ev.ts, ", ")} · {ev.source}</p>
                   </div>
                 </div>
                 {isOpen ? (
@@ -131,7 +135,7 @@ export default function HistoryPage() {
                   <p className="text-sm text-muted">{e.detail}</p>
                 </div>
                 <div className="col-start-2 flex flex-wrap items-center gap-2 text-xs sm:col-start-3 sm:row-span-2 sm:flex-col sm:items-end">
-                  <span className="tabular-nums text-muted">{fmtDate(e.ts)} · {fmtTime(e.ts)}</span>
+                  <span className="tabular-nums text-muted">{when(e.ts, " · ")}</span>
                   <span className={cn("rounded-full px-2 py-0.5 font-semibold capitalize", STATUS_CLS[e.status])}>{e.status.replace("-", " ")}</span>
                 </div>
                 <p className="col-start-2 text-xs text-muted">{e.notified.length ? `Notified: ${e.notified.join(", ")}` : "No one was notified"}</p>
