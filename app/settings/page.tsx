@@ -8,6 +8,7 @@ import { LANGS } from "@/lib/i18n";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import PlacePicker from "@/components/PlacePicker";
+import { usePhone } from "@/lib/phone-state";
 
 function Group({ title, desc, children }: { title: string; desc?: string; children: React.ReactNode }) {
   return (
@@ -136,6 +137,7 @@ export default function SettingsPage() {
             onClick={() => {
               if (!confirmReset) { setConfirmReset(true); setTimeout(() => setConfirmReset(false), 4000); return; }
               s.reset();
+              usePhone.getState().reset(); // phone favourites change who an SOS alerts, so they reset too
               setWord("blue umbrella");
               setConfirmReset(false);
               toast.success("Demo data reset", { description: "Contacts, history and reports are back to the sample set." });
