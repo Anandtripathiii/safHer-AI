@@ -9,6 +9,7 @@ import { useHold, useNow } from "@/lib/hooks";
 import { fmtClock } from "@/lib/utils";
 import { Waveform } from "@/components/Overlays";
 import { useCoordination, StatusPill } from "@/components/Coordination";
+import { useT } from "@/lib/i18n";
 
 type Recognition = { continuous: boolean; interimResults: boolean; lang: string; start(): void; stop(): void; onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null; onend: (() => void) | null; onerror: ((e: { error: string }) => void) | null };
 
@@ -16,6 +17,7 @@ export default function SosPage() {
   const { sos, safeWord, fireSOS, resolveSOS } = useApp();
   const now = useNow(1000);
   const coord = useCoordination();
+  const tr = useT();
   const hold = useHold(() => fireSOS("Hold-to-confirm button"));
   const [shakeOn, setShakeOn] = useState(false);
   const [voiceOn, setVoiceOn] = useState(false);
@@ -76,7 +78,7 @@ export default function SosPage() {
       <div className="mx-auto flex max-w-md flex-col items-center">
         {!sos ? (
           <>
-            <h1 className="text-center text-2xl font-semibold">Press and hold for 2 seconds</h1>
+            <h1 className="text-center text-2xl font-semibold">{tr("holdSos")}</h1>
             <p className="mt-2 text-center text-sm text-white/60">Your trusted contacts get your live location. Release to cancel.</p>
 
             <div className="relative mt-10 grid h-[272px] w-[272px] place-items-center">
@@ -136,7 +138,7 @@ export default function SosPage() {
             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="grid h-40 w-40 place-items-center rounded-full bg-danger">
               <span className="text-4xl font-bold">SOS</span>
             </motion.div>
-            <h1 className="mt-6 text-2xl font-semibold">Alert sent</h1>
+            <h1 className="mt-6 text-2xl font-semibold">{tr("alertSentTitle")}</h1>
             <p className="mt-1 text-sm text-white/60">Started {fmtClock((now - sos.startedAt) / 1000)} ago · {sos.source}</p>
             <div className="mt-6 flex items-center gap-3 rounded-full bg-white/[0.08] px-4 py-2 text-sm">
               <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-danger" /> Recording evidence {fmtClock((now - sos.startedAt) / 1000)}
@@ -152,9 +154,9 @@ export default function SosPage() {
               ))}
             </ul>
             <div className="mt-8 grid w-full gap-2">
-              <Link href="/map" className="btn h-12 bg-white font-semibold text-[#120e18] hover:bg-white/90"><Smartphone size={18} /> Open live tracking</Link>
-              <button className="btn h-12 border border-white/25 text-white hover:bg-white/10" onClick={() => { resolveSOS(false); toast.success("Alert resolved", { description: "Recording saved to your Evidence Vault." }); }}>I'm safe now</button>
-              <button className="btn h-11 text-sm text-white/70 hover:bg-white/10" onClick={() => { resolveSOS(true); toast("False alarm cancelled", { description: "Contacts told you're safe." }); }}>Cancel false alarm</button>
+              <Link href="/map" className="btn h-12 bg-white font-semibold text-[#120e18] hover:bg-white/90"><Smartphone size={18} /> {tr("openLiveTracking")}</Link>
+              <button className="btn h-14 border border-white/25 text-lg font-bold text-white hover:bg-white/10" onClick={() => { resolveSOS(false); toast.success(tr("alertResolved"), { description: tr("recordingSaved") }); }}>{tr("imSafeNow")}</button>
+              <button className="btn h-11 text-sm text-white/70 hover:bg-white/10" onClick={() => { resolveSOS(true); toast(tr("falseAlarmCancelled"), { description: tr("contactsToldSafe") }); }}>{tr("cancelFalseAlarm")}</button>
             </div>
           </>
         )}
