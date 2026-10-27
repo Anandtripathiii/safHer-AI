@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { Switch } from "./ui/switch";
 import { useDeviceBattery } from "@/lib/hooks";
 import { BatteryGlyph } from "./StatusBar";
+import Logo from "./Logo";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "./ui/sheet";
 
 export const NAV: { href: string; key: Key; icon: typeof Home }[] = [
@@ -112,7 +113,7 @@ export default function Navbar() {
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-pink-soft text-pink-strong">
             <ShieldHalf size={18} strokeWidth={2.4} />
           </span>
-          <span className="text-[17px] font-semibold tracking-tight">SafeHer</span>
+          <Logo className="text-[18px]" />
           {demoMode && <span className="rounded-full bg-warning/20 px-2 py-0.5 text-[10px] font-bold tracking-wider text-[#9a6a0c] dark:text-warning">DEMO</span>}
         </Link>
 

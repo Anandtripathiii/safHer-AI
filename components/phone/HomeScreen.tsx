@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { BatteryBanner, LocationOffBanner } from "../SafetyBanners";
 import { BatteryGlyph } from "../StatusBar";
 import RouteSheet from "./RouteSheet";
+import Logo from "../Logo";
 import { Avatar, pbtn } from "./ui";
 
 export default function HomeScreen() {
@@ -35,7 +36,7 @@ export default function HomeScreen() {
           <MapPin size={15} className={locOn ? "text-pink-strong" : ""} />
           {locOn ? <>Delhi NCR • Updated {Math.max(1, Math.round((now - s.hereAt) / 1000))}s ago</> : "Location off"}
         </span>
-        <span className="text-[13px] text-muted">Hi, Anand</span>
+        <Logo className="text-[20px]" />
       </div>
 
       {s.locPerm === "denied" && <LocationOffBanner action={<button className="text-[13px] underline" onClick={() => s.set({ locPerm: "unasked" })}>Fix</button>} />}

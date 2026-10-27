@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, BellRing, Route, UsersRound } from "lucide-react";
 import { useApp } from "@/lib/store";
 import LocationPill from "@/components/LocationPill";
+import Logo from "@/components/Logo";
 
 function Illustration() {
   return (
@@ -51,6 +52,7 @@ export default function Landing() {
       <section className="grid items-center gap-12 md:grid-cols-[1.15fr_1fr]">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, ease: "easeOut" }}>
           <div className="flex flex-wrap items-center gap-3">
+            <Logo className="text-[28px]" />
             <p className="text-sm font-medium text-pink-strong">Good evening, Anand</p>
             <LocationPill />
           </div>
