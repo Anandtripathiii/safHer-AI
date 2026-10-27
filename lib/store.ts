@@ -1,12 +1,13 @@
 "use client";
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 import {
   CONTACTS, DEFAULT_ZONES, LANDMARKS, MISSED_CHECKIN as MISSED, RISK_SCENARIOS, seedEvents, seedPosts,
   type Contact, type EventStatus, type Lang, type LatLng, type Post, type RiskScenario, type SafeEvent, type SafeZone,
 } from "./seed";
 import { coordinationAt, coordinationScript, distM, etaMinutes, routeScores, routesFor, type RouteKind } from "./simulation";
 import { sosChain, usePhone } from "./phone-state";
+import { syncedStorage } from "./supabase";
 
 /** Who an SOS goes to, in order: starred favourites, then trusted contacts. */
 export const alertChain = (contacts: Contact[]) => sosChain(contacts, usePhone.getState().favourites);
@@ -257,6 +258,7 @@ export const useApp = create<State & Actions>()(
     }),
     {
       name: "safeher",
+      storage: createJSONStorage(() => syncedStorage),
       skipHydration: true,
       // Never write real coordinates to storage; only whether permission was granted or denied.
       // Minimised state is per-visit: a refresh always shows the full navbar.

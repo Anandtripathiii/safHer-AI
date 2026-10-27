@@ -1,6 +1,6 @@
 # SafeHer AI
 
-A women's safety web app built for a hackathon (Problem Statement 4). Everything is interactive, and **all data is synthetic**. There is no backend. It never sends a real SMS, never places a real call and never polls your location. The app does not guarantee anyone's safety. In a real emergency in India, dial **112**.
+A women's safety web app built for a hackathon (Problem Statement 4). Everything is interactive, and **all data is synthetic**. The only backend is optional Supabase sync (see Setup). It never sends a real SMS, never places a real call and never polls your location. The app does not guarantee anyone's safety. In a real emergency in India, dial **112**.
 
 ## Setup
 
@@ -10,6 +10,12 @@ npm run dev        # http://localhost:3000
 npm run build      # production build + type check
 npm test           # simulation + assistant logic self-checks (Node 22.6+)
 ```
+
+### Database (optional)
+
+1. Create a free project at supabase.com and run `supabase/schema.sql` in its SQL editor.
+2. Copy `.env.example` to `.env.local` and fill in the project URL and anon key.
+3. Restart `npm run dev` — contacts, journeys, SOS events, safe places and community reports now sync to Supabase (without the vars, everything stays in `localStorage`).
 
 There's no login. The app starts as the seeded user **Anand Tripathi (Delhi NCR)**. Every change is saved to `localStorage` under the key `safeher`. To get the original sample data back, use **Settings → Demo data → Reset & reseed**.
 
