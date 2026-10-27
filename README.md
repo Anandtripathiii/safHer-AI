@@ -57,7 +57,7 @@ Turn on **Demo mode** (top-right switch, or `Ctrl+Shift+D`) before presenting:
 
 | Route | What it does |
 |---|---|
-| `/` | Calm landing page and onboarding, with a "Try the 2-minute demo" button |
+| `/` | Redirects to `/sos` |
 | `/journey` | Safe Journey Mode: From/To autocomplete over 21 Delhi NCR landmarks, expected arrival, who to notify, progress bar, check-ins every 2 minutes, "Simulate fall" |
 | `/map` | Live blue dot, "Shared with" viewers with live "last viewed" times, auto-stop countdown, Stop sharing, Fastest vs Safer routes with a score breakdown, 15 help points, safe-zone circles, live coordination feed during an SOS |
 | `/sos` | Dark screen with a 2-second press-and-hold button and countdown ring, Shake-to-SOS plus "Simulate shake", and Voice SOS that starts listening on open ("Listening for: …" your safe word, default `pineapple`) |

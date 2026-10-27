@@ -18,7 +18,6 @@ import { AUTO_DEMO_EVENT } from "./AutoDemo";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "./ui/sheet";
 
 export const NAV: { href: string; key: Key; icon: typeof Home }[] = [
-  { href: "/", key: "home", icon: Home },
   { href: "/journey", key: "journey", icon: Navigation },
   { href: "/map", key: "map", icon: Map },
   { href: "/sos", key: "sos", icon: Siren },
@@ -83,7 +82,7 @@ export default function Navbar() {
     return () => { document.removeEventListener("mousedown", close); document.removeEventListener("keydown", key); };
   }, []);
 
-  const isActive = (href: string) => (href === "/" ? path === "/" : path.startsWith(href));
+  const isActive = (href: string) => path.startsWith(href);
   const pages = [...NAV, ...MORE].map((n) => ({ href: n.href, label: t(n.key, lang) })).filter((p) => p.label.toLowerCase().includes(q.toLowerCase()));
   const places = q ? LANDMARKS.filter((l) => l.name.toLowerCase().includes(q.toLowerCase())).slice(0, 6) : [];
   const go = (href: string) => { setSearch(false); setQ(""); router.push(href); };
@@ -110,7 +109,7 @@ export default function Navbar() {
   return (
     <>
       <header className="fixed inset-x-3 top-4 z-[1000] mx-auto flex h-16 max-w-5xl items-center justify-between gap-2 rounded-3xl border border-line/70 bg-surface px-3 shadow-sm">
-        <Link href="/" className="flex items-center gap-2 rounded-xl pr-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-strong">
+        <Link href="/sos" className="flex items-center gap-2 rounded-xl pr-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-strong">
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-pink-soft text-pink-strong">
             <ShieldHalf size={18} strokeWidth={2.4} />
           </span>
