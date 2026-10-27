@@ -10,6 +10,7 @@ import { distM, pointAt } from "@/lib/simulation";
 
 const MINIMIZE_MS = 10_000;
 import { alertChime } from "@/lib/sound";
+import { tNow } from "@/lib/i18n";
 
 export default function Engine() {
   const router = useRouter();
@@ -25,7 +26,7 @@ export default function Engine() {
       const n = alertChain(useApp.getState().contacts).filter((c) => !c.escalation).length;
       alertChime();
       navigator.vibrate?.([200, 100, 200]);
-      toast.success(`Alert sent to ${n} contacts`, { description: "Live location shared · recording started" });
+      toast.success(tNow("alertSent", { n }), { description: tNow("alertSentDesc") });
       if (pathRef.current !== "/map") setTimeout(() => router.push("/map"), 900);
     }
   }, [sos?.id, router]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -58,10 +59,10 @@ export default function Engine() {
           const isDestination = distM(z.pos, landmark(j.toId).pos) <= z.radius;
           if (is && isDestination && !s.sos) {
             s.set({ minimizeAt: now + MINIMIZE_MS });
-            toast(`You've reached ${z.name} — SafeHer will minimize in 10s to save battery`, { description: `Auto-update sent to ${notified.join(", ") || "your contacts"}`, duration: MINIMIZE_MS });
+            toast(tNow("reachedMinimize", { place: z.name }), { description: `Auto-update sent to ${notified.join(", ") || "your contacts"}`, duration: MINIMIZE_MS });
           } else if (!is && (s.minimized || s.minimizeAt)) {
             s.set({ minimized: false, minimizeAt: null });
-            toast.warning(`You left ${z.name} — SafeHer is active`);
+            toast.warning(tNow("leftActive", { place: z.name }));
           } else {
             toast(msg, { description: `Auto-update sent to ${notified.join(", ") || "your contacts"}` });
           }
@@ -119,7 +120,7 @@ export default function Engine() {
       else if (k === "d") { e.preventDefault(); s.set({ demoMode: !s.demoMode }); toast(`Demo mode ${!s.demoMode ? "on" : "off"}`); }
       else if (k === "x") {
         e.preventDefault();
-        if (s.sos) { s.resolveSOS(true); toast("False alarm cancelled", { description: "Contacts told you're safe." }); }
+        if (s.sos) { s.resolveSOS(true); toast(tNow("falseAlarmCancelled"), { description: tNow("contactsToldSafe") }); }
         else if (s.risk) s.respondRisk("safe");
         else if (s.checkin) s.answerCheckin();
       } else if (k === "f") { e.preventDefault(); s.set({ call: { phase: "ringing", since: Date.now() } }); }
