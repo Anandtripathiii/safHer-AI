@@ -1,7 +1,9 @@
 "use client";
-import { BatteryMedium, KeyRound, MapPin, Moon, Signal, Sun } from "lucide-react";
+import { BatteryMedium, Car, Clapperboard, EyeOff, KeyRound, MapPin, Moon, Route, Signal, Sun, BatteryWarning, House } from "lucide-react";
 import { usePhone, type Network } from "@/lib/phone-state";
-import { TELEPORTS, type TeleportKey } from "@/lib/seed";
+import { RISK_SCENARIOS, TELEPORTS, type TeleportKey } from "@/lib/seed";
+import { useNow } from "@/lib/hooks";
+import { fmtClock } from "@/lib/utils";
 import { distM } from "@/lib/simulation";
 import { cn } from "@/lib/utils";
 
@@ -82,6 +84,77 @@ function PermissionsGroup() {
   );
 }
 
+/** Clears anything on screen so a scenario starts from a clean, visible app. */
+const clean = { risk: null, cab: null, report: null, decoy: false, locked: false, minimized: false, minimizeAt: null, revealed: true, followed: null } as const;
+
+function ScenarioGroup() {
+  const s = usePhone();
+  const now = useNow(1000);
+  const home = s.safePlaces.find((p) => p.name === "Home") ?? s.safePlaces[0];
+  const ensureLocation = () => (s.locPerm === "unasked" || s.locPerm === "denied" ? { locPerm: "while" as const, hereAt: Date.now() } : {});
+
+  const scenarios: { label: string; hint: string; icon: typeof Route; run: () => void }[] = [
+    {
+      label: "Walk home at night", hint: "Night + unsafe area + Safe Journey to Home", icon: Moon,
+      run: () => {
+        if (s.sos) s.resolveSOS();
+        s.set({ ...clean, ...ensureLocation(), night: true, inside: [] });
+        s.teleport("unsafe");
+        s.startJourney(home.name, home.pos, "safer");
+        s.say("Night walk started — Safer route chosen automatically", "info");
+      },
+    },
+    {
+      label: "Low battery emergency", hint: "Battery 8% + SOS", icon: BatteryWarning,
+      run: () => { s.set({ ...clean, ...ensureLocation(), battery: 8 }); if (s.sos) s.resolveSOS(); setTimeout(() => usePhone.getState().fireSOS("Low battery emergency"), 50); },
+    },
+    {
+      label: "Reach home safely", hint: "Teleport to Home → auto-minimise in 10s", icon: House,
+      run: () => { s.set({ ...clean, ...ensureLocation(), inside: [], journey: null }); s.teleport("home"); },
+    },
+    {
+      label: "Lost route", hint: "Triggers risk detection", icon: Route,
+      run: () => { s.set({ ...clean, tab: s.journey ? "map" : s.tab, journey: s.journey ? { ...s.journey, flagged: true } : null }); s.set({ risk: { ...RISK_SCENARIOS[2], at: Date.now() }, pulse: s.pulse + 1 }); },
+    },
+    {
+      label: "Took a cab", hint: "Sudden speed jump → number-plate scan", icon: Car,
+      run: () => {
+        s.set({ ...clean, ...ensureLocation() });
+        if (!usePhone.getState().journey) s.startJourney("College", s.safePlaces.find((p) => p.name === "College")?.pos ?? TELEPORTS.college.pos, "fastest");
+        const j = usePhone.getState().journey!;
+        s.set({ journey: { ...j, inCab: true, cabChecked: false, startedAt: Date.now() } });
+      },
+    },
+    {
+      label: "Silent SOS", hint: "Same as holding the side button — nothing shows on the phone", icon: EyeOff,
+      run: () => { s.set({ ...ensureLocation() }); s.fireSOS("Side button held", true); },
+    },
+  ];
+
+  return (
+    <Group icon={Clapperboard} title="Scenarios">
+      <div className="grid gap-1.5">
+        {scenarios.map((x) => (
+          <button key={x.label} onClick={x.run} className="flex min-h-12 items-center gap-3 rounded-2xl border border-line px-3 py-2 text-left transition hover:bg-pink-soft/40 hover:shadow-sm">
+            <x.icon size={20} className="shrink-0 text-pink-strong" />
+            <span><span className="block text-sm font-semibold">{x.label}</span><span className="block text-xs text-muted">{x.hint}</span></span>
+          </button>
+        ))}
+      </div>
+      <div className="mt-3 rounded-2xl bg-bg p-3 text-xs" aria-live="polite">
+        <p className="font-semibold uppercase tracking-wider text-muted">Live state</p>
+        <p className="mt-1">
+          {s.sos ? <span className="font-semibold text-danger">{s.sos.silent ? "Silent SOS" : "SOS"} active · {fmtClock((now - s.sos.startedAt) / 1000)}{s.decoy ? " · decoy screen on (still recording)" : ""}</span> : "No SOS"}
+          {" · "}{s.journey ? `Journey to ${s.journey.destName} ${Math.round(s.journey.progress * 100)}%${s.journey.inCab ? " (in cab)" : ""}` : "No journey"}
+          {s.minimized && " · App minimised"}
+          {s.followed && ` · Being-followed mode → ${s.followed.target}`}
+        </p>
+        {s.sos && <button onClick={s.resolveSOS} className="mt-2 font-semibold text-pink-strong underline-offset-2 hover:underline">End SOS</button>}
+      </div>
+    </Group>
+  );
+}
+
 /** Right-hand panel on /phone-demo: every simulated state, grouped. */
 export default function JudgeControls() {
   return (
@@ -95,6 +168,7 @@ export default function JudgeControls() {
       <NetworkGroup />
       <TimeGroup />
       <PermissionsGroup />
+      <ScenarioGroup />
     </aside>
   );
 }

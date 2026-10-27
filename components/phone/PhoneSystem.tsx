@@ -100,7 +100,7 @@ export function Springboard() {
         transition={{ duration: 2, repeat: Infinity }}
         className="absolute bottom-24 right-4 flex h-14 items-center gap-2 rounded-full bg-surface/95 pl-2 pr-4 text-[14px] font-semibold text-ink shadow-md"
       >
-        <span className="grid h-10 w-10 place-items-center rounded-full bg-pink-strong text-white">{disguise ? <Calculator size={20} /> : <ShieldHalf size={20} />}</span>
+        <span className={cn("grid h-10 w-10 place-items-center rounded-full text-white", disguise ? "bg-[#1c1c1e] text-[#ff9f0a]" : "bg-pink-strong")}>{disguise ? <Calculator size={20} /> : <ShieldHalf size={20} />}</span>
         {disguise ? "Running" : "SafeHer running"}
       </motion.button>
     </motion.div>
