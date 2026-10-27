@@ -4,6 +4,7 @@ import { usePhone } from "@/lib/phone-state";
 import PhoneFrame from "@/components/PhoneFrame";
 import PhoneApp from "@/components/phone/PhoneApp";
 import PhoneEngine from "@/components/phone/PhoneEngine";
+import JudgeControls from "@/components/JudgeControls";
 
 export default function PhoneDemoPage() {
   const { osDark, pulse, fireSOS } = usePhone();
@@ -20,6 +21,7 @@ export default function PhoneDemoPage() {
         </PhoneFrame>
         <p className="mt-4 max-w-sm text-center text-xs text-muted">Simulated phone. Nothing here touches your real contacts, location or battery.</p>
       </div>
+      <JudgeControls />
     </main>
   );
 }
