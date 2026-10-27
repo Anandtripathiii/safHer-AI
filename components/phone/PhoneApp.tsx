@@ -5,6 +5,7 @@ import { Home, Map as MapIcon, Siren, UsersRound, UserRound, Phone } from "lucid
 import { usePhone, favouriteContacts, type Tab } from "@/lib/phone-state";
 import { cn } from "@/lib/utils";
 import StatusBar from "../StatusBar";
+import HomeScreen from "./HomeScreen";
 
 const TABS: { id: Tab; label: string; icon: typeof Home }[] = [
   { id: "home", label: "Home", icon: Home },
@@ -14,7 +15,7 @@ const TABS: { id: Tab; label: string; icon: typeof Home }[] = [
   { id: "profile", label: "Profile", icon: UserRound },
 ];
 
-export const SCREENS: Partial<Record<Tab, () => JSX.Element>> = {};
+const SCREENS: Partial<Record<Tab, () => JSX.Element>> = { home: HomeScreen };
 
 function TabBar() {
   const { tab, set, favourites, say } = usePhone();
@@ -82,7 +83,8 @@ export default function PhoneApp() {
   return (
     <>
       <StatusBar />
-      <main className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain">
+      {/* Not `relative`: in-app sheets position against the whole phone screen. */}
+      <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
         {Screen ? <Screen /> : <div className="p-5 text-muted">Loading…</div>}
       </main>
       <TabBar />
