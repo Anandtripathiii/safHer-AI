@@ -7,7 +7,7 @@ import {
   BookUser, Bot, History, Home, LayoutDashboard, Map, MapPin, Moon, Navigation, Search, Settings, ShieldHalf, Siren, Smartphone, Sun, Users, CircleHelp,
 } from "lucide-react";
 import { useApp } from "@/lib/store";
-import { t, type Key } from "@/lib/i18n";
+import { LANGS, t, type Key } from "@/lib/i18n";
 import { LANDMARKS } from "@/lib/seed";
 import { cn } from "@/lib/utils";
 import { Switch } from "./ui/switch";
@@ -25,11 +25,11 @@ export const NAV: { href: string; key: Key; icon: typeof Home }[] = [
   { href: "/phone-demo", key: "phoneDemo", icon: Smartphone },
 ];
 
-const MORE = [
-  { href: "/contacts", label: "Trusted contacts", icon: BookUser },
-  { href: "/community", label: "Community reports", icon: Users },
-  { href: "/history", label: "Safety history", icon: History },
-  { href: "/settings", label: "Settings", icon: Settings },
+const MORE: { href: string; key: Key; icon: typeof Home }[] = [
+  { href: "/contacts", key: "contacts", icon: BookUser },
+  { href: "/community", key: "community", icon: Users },
+  { href: "/history", key: "history", icon: History },
+  { href: "/settings", key: "settings", icon: Settings },
 ];
 
 export const SHORTCUTS = [
@@ -82,7 +82,7 @@ export default function Navbar() {
   }, []);
 
   const isActive = (href: string) => (href === "/" ? path === "/" : path.startsWith(href));
-  const pages = [...NAV.map((n) => ({ href: n.href, label: t(n.key, lang) })), ...MORE].filter((p) => p.label.toLowerCase().includes(q.toLowerCase()));
+  const pages = [...NAV, ...MORE].map((n) => ({ href: n.href, label: t(n.key, lang) })).filter((p) => p.label.toLowerCase().includes(q.toLowerCase()));
   const places = q ? LANDMARKS.filter((l) => l.name.toLowerCase().includes(q.toLowerCase())).slice(0, 6) : [];
   const go = (href: string) => { setSearch(false); setQ(""); router.push(href); };
 
@@ -100,7 +100,7 @@ export default function Navbar() {
         className="fixed bottom-6 right-6 z-[1000] flex h-14 items-center gap-2 rounded-full bg-surface pl-2 pr-5 text-sm font-semibold text-ink shadow-md ring-1 ring-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-strong"
       >
         <span className="grid h-10 w-10 place-items-center rounded-full bg-pink-strong text-white"><ShieldHalf size={20} /></span>
-        SafeHer running
+        {t("safeherRunning", lang)}
       </motion.button>
     );
   }
@@ -122,7 +122,7 @@ export default function Navbar() {
 
         <div className="flex items-center gap-1">
           <label className="flex cursor-pointer items-center gap-2 rounded-full px-2 py-1 text-xs font-medium text-muted hover:bg-pink-soft/40" title="Demo mode (Ctrl+Shift+D)">
-            <span className="hidden sm:inline">Demo mode</span>
+            <span className="hidden sm:inline">{t("demoMode", lang)}</span>
             <Switch checked={demoMode} onCheckedChange={(v) => set({ demoMode: v })} aria-label="Demo mode" />
           </label>
           {battery && (
@@ -130,7 +130,7 @@ export default function Navbar() {
               <BatteryGlyph level={battery.level} className="text-ink" />{battery.level}%
             </span>
           )}
-          <button className={cn(roundBtn, "hidden sm:grid")} onClick={() => setSearch(true)} aria-label="Search" title="Search (Ctrl+K)">
+          <button className={cn(roundBtn, "hidden sm:grid")} onClick={() => setSearch(true)} aria-label={t("search", lang)} title={`${t("search", lang)} (Ctrl+K)`}>
             <Search size={18} />
           </button>
           <button className={roundBtn} onClick={() => set({ theme: theme === "dark" ? "light" : "dark" })} aria-label="Toggle theme" title="Toggle theme">
@@ -156,16 +156,25 @@ export default function Navbar() {
                 </div>
                 {MORE.map((m) => (
                   <Link key={m.href} href={m.href} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm hover:bg-pink-soft/50">
-                    <m.icon size={18} className="text-muted" /> {m.label}
+                    <m.icon size={18} className="text-muted" /> {t(m.key, lang)}
                   </Link>
                 ))}
                 <div className="my-1 h-px bg-line sm:hidden" />
                 <button onClick={() => { setMenu(false); setSearch(true); }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm hover:bg-pink-soft/50 sm:hidden">
-                  <Search size={18} className="text-muted" /> Search
+                  <Search size={18} className="text-muted" /> {t("search", lang)}
                 </button>
                 <button onClick={() => { setMenu(false); setHelp(true); }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm hover:bg-pink-soft/50 sm:hidden">
-                  <CircleHelp size={18} className="text-muted" /> Help & shortcuts
+                  <CircleHelp size={18} className="text-muted" /> {t("help", lang)}
                 </button>
+                <div className="my-1 h-px bg-line" />
+                <div className="flex items-center gap-1 px-2 py-1.5" role="radiogroup" aria-label={t("language", lang)}>
+                  {LANGS.map((l) => (
+                    <button key={l.id} role="radio" aria-checked={lang === l.id} onClick={() => set({ lang: l.id })}
+                      className={cn("flex-1 rounded-full px-2 py-1.5 text-xs font-semibold", lang === l.id ? "bg-pink-strong text-white" : "text-muted hover:bg-pink-soft/50")}>
+                      {l.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -179,7 +188,7 @@ export default function Navbar() {
 
       <Sheet open={search} onOpenChange={setSearch}>
         <SheetContent>
-          <SheetTitle>Search</SheetTitle>
+          <SheetTitle>{t("search", lang)}</SheetTitle>
           <SheetDescription>Jump to a screen or plan a trip to a place.</SheetDescription>
           <input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder="Try “map”, “history” or “Nehru Place”" className="input mt-4" />
           <div className="mt-4 space-y-1">
@@ -198,7 +207,7 @@ export default function Navbar() {
 
       <Sheet open={help} onOpenChange={setHelp}>
         <SheetContent>
-          <SheetTitle>Help & keyboard shortcuts</SheetTitle>
+          <SheetTitle>{t("help", lang)}</SheetTitle>
           <SheetDescription>SafeHer is a hackathon prototype. All people, places and alerts are sample data, and it never contacts real emergency services.</SheetDescription>
           <dl className="mt-6 divide-y divide-line">
             {SHORTCUTS.map(([k, d]) => (
