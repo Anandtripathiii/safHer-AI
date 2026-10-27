@@ -6,6 +6,7 @@ import { useApp } from "@/lib/store";
 import { PHONE_CONTACTS } from "@/lib/seed";
 import { cn } from "@/lib/utils";
 import { Avatar, pbtn } from "./ui";
+import Helplines from "../Helplines";
 
 /** Dialer-style grid of favourites — big circles, in SOS escalation order. */
 export function FavouritesDialer() {
@@ -44,6 +45,7 @@ export default function ContactsScreen() {
   return (
     <div className="space-y-5 px-4 pb-6 pt-1">
       <h1 className="px-1 text-[26px] font-bold">Contacts</h1>
+      <Helplines phone />
       <FavouritesDialer />
 
       <section>

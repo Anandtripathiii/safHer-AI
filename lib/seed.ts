@@ -340,3 +340,13 @@ export const DEFAULT_SAFE_PLACES: SafePlace[] = [
   { id: "sp-college", name: "College", landmarkId: "iiitd", pos: [28.5459, 77.2732], radius: 300 },
   { id: "sp-hostel", name: "Hostel", landmarkId: "nsic", pos: [28.5546, 77.2649], radius: 250 },
 ];
+
+// ---------- Government helplines (real public numbers; Call opens the phone's dialer) ----------
+export const HELPLINES = [
+  { name: "Women Helpline (National)", number: "181" },
+  { name: "Police / Emergency", number: "112" },
+  { name: "Women in Distress", number: "1091" },
+  { name: "Domestic Violence", number: "181" },
+  { name: "Delhi Commission for Women", number: "011-23378044" },
+  { name: "Childline", number: "1098" },
+];

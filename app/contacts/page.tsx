@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useApp } from "@/lib/store";
 import { PHONE_CONTACTS, type Contact } from "@/lib/seed";
 import { usePhone, MAX_FAVOURITES } from "@/lib/phone-state";
+import Helplines from "@/components/Helplines";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 
@@ -66,6 +67,8 @@ export default function ContactsPage() {
           <button className="btn-primary" onClick={() => setEdit(blank())}><Plus size={18} /> Add</button>
         </div>
       </div>
+
+      <Helplines className="mt-8" />
 
       <section className="mt-8">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-muted">Alerted first</h2>
