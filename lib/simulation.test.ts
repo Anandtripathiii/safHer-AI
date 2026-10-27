@@ -53,6 +53,7 @@ assert.equal(routesFor([0, 0], [1, 1]).fastest.length, 3);
 assert.ok(heardSafeWord("ok so I want a PINEAPPLE juice", "pineapple"));
 assert.ok(heardSafeWord("call me on the blue umbrella line", "Blue Umbrella"));
 assert.ok(!heardSafeWord("help me", "pineapple"));
+assert.ok(heardSafeWord("I want pine apple.", "pineapple"));
 assert.ok(!heardSafeWord("anything", "   "));
 // female voice picker: language + name priority, a different voice for the caller, null when none exist
 const V = (name: string, lang: string) => ({ name, lang }) as SpeechSynthesisVoice;

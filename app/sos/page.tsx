@@ -69,7 +69,10 @@ export default function SosPage() {
             <h1 className="text-center text-2xl font-semibold">{tr("holdSos")}</h1>
             <p className="mt-2 text-center text-sm text-white/60">Your trusted contacts get your live location. Release to cancel.</p>
             {voiceOn && voice.status === "listening" && (
-              <p className="mt-3 flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-semibold"><Mic size={16} className="text-danger" />Listening for: “{safeWord}”</p>
+              <div className="mt-3 max-w-full rounded-2xl bg-white/10 px-4 py-2 text-center text-sm">
+                <p className="font-semibold">🎤 Listening… for “{safeWord}”</p>
+                <p className="truncate text-xs text-white/60">{heard ? `Heard: “${heard}”` : "Say something — what the mic hears shows here"}</p>
+              </div>
             )}
 
             <div className="relative mt-10 grid h-[272px] w-[272px] place-items-center">
