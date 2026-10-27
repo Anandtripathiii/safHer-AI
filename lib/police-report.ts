@@ -6,7 +6,7 @@ import { coordinationAt, coordinationScript, distM, pointAt, type DeliveryStatus
 export type ReportInput = { event: SafeEvent; durationSec: number; contacts: Contact[]; network: "good" | "weak" };
 
 const STATUS_LABEL: Record<DeliveryStatus, string> = {
-  pending: "Pending", delivered: "Delivered", viewed: "Viewed location", acknowledged: "Acknowledged", "no-response": "No response — escalated",
+  pending: "Pending", delivered: "Delivered", viewed: "Viewed location", acknowledged: "Acknowledged", "no-response": "No response",
 };
 const OUTCOME: Record<SafeEvent["status"], string> = {
   resolved: "Resolved — complainant confirmed safe",
@@ -56,9 +56,10 @@ export async function downloadPoliceReport({ event, durationSec, contacts, netwo
     doc.saveGraphicsState();
     doc.setGState(new GState({ opacity: 0.07 }));
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(58);
+    doc.setFontSize(52);
     doc.setTextColor(120, 40, 70);
-    doc.text("SAMPLE — DEMO DATA", W / 2, 170, { align: "center", angle: 35 });
+    // Rotated from its baseline start, so anchor bottom-left to keep the whole phrase on the page.
+    doc.text("SAMPLE — DEMO DATA", 28, 232, { angle: 35 });
     doc.restoreGraphicsState();
   };
   const ensure = (need: number) => { if (y + need > 272) { doc.addPage(); watermark(); y = 20; } };
@@ -130,7 +131,7 @@ export async function downloadPoliceReport({ event, durationSec, contacts, netwo
   heading("2. Incident summary");
   kv([
     ["Alert raised", fmt(event.ts) + " IST"],
-    ["How it was raised", event.title.replace(/^SOS — /, "")],
+    ["How it was raised", event.title.replace(/^SOS — /, "").replace(/^./, (c) => c.toUpperCase())],
     ["Duration of alert", `${Math.floor(durationSec / 60)} min ${durationSec % 60} s`],
     ["Outcome", OUTCOME[event.status]],
     ["Notes", event.detail],
@@ -143,7 +144,12 @@ export async function downloadPoliceReport({ event, durationSec, contacts, netwo
   kv([["Battery level", event.battery !== undefined ? `${event.battery}%` : "Not recorded"], ["Network", network === "good" ? "Mobile data (push + SMS)" : "Weak — alerts sent by SMS fallback"]]);
 
   heading("5. Persons notified");
-  table(["Order", "Name", "Relationship", "Response"], chain.map((c, i) => [String(i + 1), c.name, c.escalation ? "Escalation contact" : c.relation || "Trusted contact", STATUS_LABEL[status[c.id] ?? "pending"]]), [18, 50, 50, 56]);
+  const escalatedTo = chain.find((c) => c.escalation);
+  const response = (c: Contact) => {
+    const st = status[c.id] ?? "pending";
+    return st === "no-response" && escalatedTo ? `No response — escalated to ${escalatedTo.name}` : STATUS_LABEL[st];
+  };
+  table(["Order", "Name", "Relationship", "Response"], chain.map((c, i) => [String(i + 1), c.name, c.escalation ? "Escalation contact" : c.relation || "Trusted contact", response(c)]), [18, 42, 46, 68]);
 
   heading("6. Evidence");
   kv([
