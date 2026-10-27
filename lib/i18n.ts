@@ -7,6 +7,7 @@ const dict = {
   sos: { en: "SOS", hi: "SOS", bn: "SOS" },
   assistant: { en: "Assistant", hi: "सहायक", bn: "সহকারী" },
   dashboard: { en: "Dashboard", hi: "डैशबोर्ड", bn: "ড্যাশবোর্ড" },
+  phoneDemo: { en: "Phone demo", hi: "फ़ोन डेमो", bn: "ফোন ডেমো" },
   assistantTitle: { en: "Safety Assistant", hi: "सुरक्षा सहायक", bn: "নিরাপত্তা সহকারী" },
   assistantSub: { en: "Answers from SafeHer's safety guide. Not a substitute for emergency services.", hi: "SafeHer की सुरक्षा गाइड से जवाब। यह आपातकालीन सेवाओं का विकल्प नहीं है।", bn: "SafeHer-এর নিরাপত্তা নির্দেশিকা থেকে উত্তর। এটি জরুরি পরিষেবার বিকল্প নয়।" },
   greeting: { en: "Hi Anand, I'm here. Ask me anything about staying safe on your trip.", hi: "नमस्ते Anand, मैं यहाँ हूँ। अपने सफ़र की सुरक्षा के बारे में कुछ भी पूछें।", bn: "নমস্কার Anand, আমি আছি। আপনার যাত্রার নিরাপত্তা নিয়ে যা খুশি জিজ্ঞাসা করুন।" },

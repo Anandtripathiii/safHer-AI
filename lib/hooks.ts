@@ -27,3 +27,24 @@ export function useHold(onDone: () => void, ms = 2000) {
   const up = () => { start.current = null; cancelAnimationFrame(raf.current); setP(0); };
   return { p, down, up };
 }
+
+type BatteryManager = EventTarget & { level: number; charging: boolean };
+
+/** Real device battery via navigator.getBattery (Chrome desktop + Android). null when unsupported. */
+export function useDeviceBattery() {
+  const [b, setB] = useState<{ level: number; charging: boolean } | null>(null);
+  useEffect(() => {
+    const nav = navigator as Navigator & { getBattery?: () => Promise<BatteryManager> };
+    if (!nav.getBattery) return;
+    let mgr: BatteryManager | null = null;
+    const read = () => mgr && setB({ level: Math.round(mgr.level * 100), charging: mgr.charging });
+    nav.getBattery().then((m) => {
+      mgr = m;
+      read();
+      m.addEventListener("levelchange", read);
+      m.addEventListener("chargingchange", read);
+    }).catch(() => {});
+    return () => { mgr?.removeEventListener("levelchange", read); mgr?.removeEventListener("chargingchange", read); };
+  }, []);
+  return b;
+}

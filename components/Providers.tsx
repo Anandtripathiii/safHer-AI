@@ -6,6 +6,8 @@ import Engine from "./Engine";
 import Overlays from "./Overlays";
 import DemoPanel from "./DemoPanel";
 import QuickActions from "./QuickActions";
+import WebBanners from "./WebBanners";
+import { usePhone } from "@/lib/phone-state";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const theme = useApp((s) => s.theme);
@@ -13,6 +15,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     useApp.persist.rehydrate();
+    usePhone.persist.rehydrate(); // favourites + imported contacts are shared with the website
   }, []);
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
@@ -26,6 +29,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       {children}
       <Engine />
       <Overlays />
+      <WebBanners />
       <QuickActions />
       <DemoPanel />
       <Toaster position="top-center" theme={theme} richColors closeButton toastOptions={{ style: { borderRadius: 16 } }} offset={92} />

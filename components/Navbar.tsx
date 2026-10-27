@@ -3,13 +3,15 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
-  BookUser, Bot, History, Home, LayoutDashboard, Map, MapPin, Moon, Navigation, Search, Settings, ShieldHalf, Siren, Sun, Users, CircleHelp,
+  BookUser, Bot, History, Home, LayoutDashboard, Map, MapPin, Moon, Navigation, Search, Settings, ShieldHalf, Siren, Smartphone, Sun, Users, CircleHelp,
 } from "lucide-react";
 import { useApp } from "@/lib/store";
 import { t, type Key } from "@/lib/i18n";
 import { LANDMARKS } from "@/lib/seed";
 import { cn } from "@/lib/utils";
 import { Switch } from "./ui/switch";
+import { useDeviceBattery } from "@/lib/hooks";
+import { BatteryGlyph } from "./StatusBar";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "./ui/sheet";
 
 export const NAV: { href: string; key: Key; icon: typeof Home }[] = [
@@ -19,6 +21,7 @@ export const NAV: { href: string; key: Key; icon: typeof Home }[] = [
   { href: "/sos", key: "sos", icon: Siren },
   { href: "/assistant", key: "assistant", icon: Bot },
   { href: "/dashboard", key: "dashboard", icon: LayoutDashboard },
+  { href: "/phone-demo", key: "phoneDemo", icon: Smartphone },
 ];
 
 const MORE = [
@@ -63,6 +66,7 @@ export default function Navbar() {
   const [search, setSearch] = useState(false);
   const [help, setHelp] = useState(false);
   const [q, setQ] = useState("");
+  const battery = useDeviceBattery();
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => setMenu(false), [path]);
@@ -103,6 +107,11 @@ export default function Navbar() {
             <span className="hidden sm:inline">Demo mode</span>
             <Switch checked={demoMode} onCheckedChange={(v) => set({ demoMode: v })} aria-label="Demo mode" />
           </label>
+          {battery && (
+            <span title={`Device battery${battery.charging ? " · charging" : ""}`} className={cn("mr-1 hidden items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold tabular-nums lg:flex", battery.level < 10 ? "bg-danger/10 text-danger" : battery.level < 20 ? "bg-warning/20 text-[#7a5408]" : "bg-bg text-muted")}>
+              <BatteryGlyph level={battery.level} className="text-ink" />{battery.level}%
+            </span>
+          )}
           <button className={cn(roundBtn, "hidden sm:grid")} onClick={() => setSearch(true)} aria-label="Search" title="Search (Ctrl+K)">
             <Search size={18} />
           </button>
