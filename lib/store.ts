@@ -5,7 +5,7 @@ import {
   CONTACTS, DEFAULT_ZONES, LANDMARKS, MISSED_CHECKIN as MISSED, RISK_SCENARIOS, seedEvents, seedPosts,
   type Contact, type EventStatus, type Lang, type LatLng, type Post, type RiskScenario, type SafeEvent, type SafeZone,
 } from "./seed";
-import { coordinationAt, coordinationScript, distM, etaMinutes, routeFor } from "./simulation";
+import { coordinationAt, coordinationScript, distM, etaMinutes, routeScores, routesFor, type RouteKind } from "./simulation";
 import { sosChain, usePhone } from "./phone-state";
 
 /** Who an SOS goes to, in order: starred favourites, then trusted contacts. */
@@ -73,7 +73,7 @@ type Actions = {
   set: (p: Partial<State>) => void;
   log: (e: Omit<SafeEvent, "id" | "ts"> & { ts?: number }) => string;
   updateEvent: (id: string, p: Partial<SafeEvent>) => void;
-  startJourney: (p: { fromId: string; toId: string; arriveBy: string; notify: string[] }) => void;
+  startJourney: (p: { fromId: string; toId: string; arriveBy: string; notify: string[]; kind?: RouteKind }) => void;
   endJourney: (arrived: boolean) => void;
   triggerRisk: (s?: RiskScenario) => void;
   respondRisk: (r: "safe" | "sos" | "watch") => void;
@@ -141,14 +141,14 @@ export const useApp = create<State & Actions>()(
       },
       updateEvent: (id, p) => set((s) => ({ events: s.events.map((e) => (e.id === id ? { ...e, ...p } : e)) })),
 
-      startJourney: ({ fromId, toId, arriveBy, notify }) => {
+      startJourney: ({ fromId, toId, arriveBy, notify, kind = "safer" }) => {
         const from = landmark(fromId), to = landmark(toId);
-        const route = routeFor(from.pos, to.pos, fromId, toId);
+        const { route, minutes } = journeyOptions(fromId, toId)[kind];
         const now = Date.now();
         set({
           journey: {
             id: uid(), fromId, toId, startedAt: now, arriveBy, notify, route, progress: 0,
-            etaMin: fromId === "hkm" && toId === "iiitd" ? 15 : etaMinutes(route),
+            etaMin: minutes,
             nextCheckinAt: now + CHECKIN_EVERY, nextRiskAt: now + riskGap(), riskIdx: 0,
             zonesInside: zonesAt(get().zones, route[0]),
           },
@@ -260,6 +260,14 @@ export const useApp = create<State & Actions>()(
     },
   ),
 );
+
+/** Both route options between two landmarks, with sample scores. The demo pair is fixed at 12 vs 15 minutes. */
+export function journeyOptions(fromId: string, toId: string, night = false) {
+  const routes = routesFor(landmark(fromId).pos, landmark(toId).pos, fromId, toId);
+  const fastestMin = fromId === "hkm" && toId === "iiitd" ? 12 : etaMinutes(routes.fastest);
+  const build = (k: RouteKind) => ({ route: routes[k], ...routeScores(k, night, fastestMin) });
+  return { fastest: build("fastest"), safer: build("safer") };
+}
 
 export const notifyNames = (contacts: Contact[], ids: string[]) => contacts.filter((c) => ids.includes(c.id)).map((c) => c.name);
 
