@@ -11,9 +11,9 @@ import { Sheet, SheetContent, SheetDescription, SheetTitle } from "./ui/sheet";
 export default function QuickActions() {
   const path = usePathname();
   const [open, setOpen] = useState(false);
-  const { fakeCallAt, fakeCaller, fakeCallDelay, sharing, set, startSharing } = useApp();
+  const { fakeCallAt, fakeCaller, fakeCallDelay, sharing, set, startSharing, minimized } = useApp();
   const now = useNow(1000);
-  if (path === "/sos" || path === "/assistant" || path === "/phone-demo") return null;
+  if (path === "/sos" || path === "/assistant" || path === "/phone-demo" || minimized) return null; // minimised: the SafeHer bubble owns this corner
 
   const scheduleCall = () => {
     set({ fakeCallAt: Date.now() + fakeCallDelay * 1000 });
