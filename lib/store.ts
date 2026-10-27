@@ -6,6 +6,10 @@ import {
   type Contact, type EventStatus, type Lang, type LatLng, type Post, type RiskScenario, type SafeEvent, type SafeZone,
 } from "./seed";
 import { coordinationAt, coordinationScript, distM, etaMinutes, routeFor } from "./simulation";
+import { sosChain, usePhone } from "./phone-state";
+
+/** Who an SOS goes to, in order: starred favourites, then trusted contacts. */
+export const alertChain = (contacts: Contact[]) => sosChain(contacts, usePhone.getState().favourites);
 
 export type Journey = {
   id: string;
@@ -182,7 +186,7 @@ export const useApp = create<State & Actions>()(
       fireSOS: (source) => {
         if (get().sos) return;
         const now = Date.now();
-        const contacts = get().contacts;
+        const contacts = alertChain(get().contacts);
         set({
           sos: { id: uid(), startedAt: now, source, weak: get().weakNetwork },
           sharing: get().sharing ?? { startedAt: now, minutes: SHARE_MINUTES },
@@ -192,8 +196,9 @@ export const useApp = create<State & Actions>()(
       },
 
       resolveSOS: (falseAlarm) => {
-        const { sos, contacts, journey } = get();
+        const { sos, journey } = get();
         if (!sos) return;
+        const contacts = alertChain(get().contacts);
         const elapsed = (Date.now() - sos.startedAt) / 1000;
         const primary = contacts.filter((c) => !c.escalation);
         const { status, escalated } = coordinationAt(coordinationScript(contacts, sos.weak), primary.map((c) => c.id), elapsed);

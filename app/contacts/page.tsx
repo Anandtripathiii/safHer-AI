@@ -1,9 +1,10 @@
 "use client";
 import { useState } from "react";
-import { Pencil, Phone, Plus, ShieldCheck, Trash2 } from "lucide-react";
+import { BookUser, Pencil, Phone, Plus, ShieldCheck, Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useApp } from "@/lib/store";
-import type { Contact } from "@/lib/seed";
+import { PHONE_CONTACTS, type Contact } from "@/lib/seed";
+import { usePhone, MAX_FAVOURITES } from "@/lib/phone-state";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 
@@ -14,6 +15,15 @@ const initialsOf = (n: string) => n.trim().split(/\s+/).map((w) => w[0]).join(""
 export default function ContactsPage() {
   const { contacts, saveContact, removeContact } = useApp();
   const [edit, setEdit] = useState<Contact | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
+  const phone = usePhone();
+  const imported = phone.contactsPerm === "granted";
+  const toggleStar = (c: (typeof PHONE_CONTACTS)[number]) => {
+    const on = phone.favourites.includes(c.id);
+    if (!on && phone.favourites.length >= MAX_FAVOURITES) return toast.error(`You can pick up to ${MAX_FAVOURITES} favourites`);
+    phone.toggleFavourite(c.id);
+    toast(on ? `${c.name} removed from favourites` : `${c.name} is now alerted first in an SOS`);
+  };
   const primary = contacts.filter((c) => !c.escalation);
   const escalation = contacts.filter((c) => c.escalation);
 
@@ -49,9 +59,12 @@ export default function ContactsPage() {
       <div className="flex items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold">Trusted contacts</h1>
-          <p className="mt-1 text-sm text-muted">Alerted in this order. If someone doesn't reply within 20 seconds, we move on to your escalation contact.</p>
+          <p className="mt-1 text-sm text-muted">{phone.favourites.length ? "Your starred favourites are alerted first, then everyone below in this order." : "Alerted in this order."} If someone doesn't reply within 20 seconds, we move on to your escalation contact.</p>
         </div>
-        <button className="btn-primary shrink-0" onClick={() => setEdit(blank())}><Plus size={18} /> Add</button>
+        <div className="flex shrink-0 flex-wrap justify-end gap-2">
+          {!imported && <button className="btn-secondary" onClick={() => setImportOpen(true)}><BookUser size={18} /> Import contacts</button>}
+          <button className="btn-primary" onClick={() => setEdit(blank())}><Plus size={18} /> Add</button>
+        </div>
       </div>
 
       <section className="mt-8">
@@ -63,6 +76,47 @@ export default function ContactsPage() {
         <ul className="divide-y divide-line">{escalation.map((c) => <Row key={c.id} c={c} />)}</ul>
         {!escalation.length && <p className="pb-4 text-sm text-muted">Mark a contact as an escalation contact to have a backup when someone doesn't respond.</p>}
       </section>
+
+      {imported && (
+        <section className="mt-10">
+          <div className="flex items-baseline justify-between">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted">Imported contacts</h2>
+            <span className="text-sm font-semibold text-[#7c5cd6]">{phone.favourites.length}/{MAX_FAVOURITES} favourites · alerted first in SOS</span>
+          </div>
+          <ul className="mt-2 grid gap-2 sm:grid-cols-2">
+            {PHONE_CONTACTS.map((c) => {
+              const fav = phone.favourites.includes(c.id);
+              return (
+                <li key={c.id} className={`flex items-center gap-3 rounded-2xl border p-3 ${fav ? "border-[#7c5cd6]/40 bg-[#7c5cd6]/5" : "border-line bg-surface"}`}>
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-xs font-bold text-white" style={{ background: c.color }}>{c.initials}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-center gap-1.5 font-medium">
+                      <span className="truncate">{c.name}</span>
+                      {fav && <span className="shrink-0 rounded-full bg-[#7c5cd6] px-1.5 py-0.5 text-[10px] font-bold text-white">#{phone.favourites.indexOf(c.id) + 1}</span>}
+                    </span>
+                    <span className="block truncate text-xs text-muted">{c.relation} · {c.phone}</span>
+                  </span>
+                  <button onClick={() => toggleStar(c)} aria-pressed={fav} aria-label={fav ? `Remove ${c.name} from favourites` : `Make ${c.name} a favourite`} className="grid h-11 w-11 place-items-center rounded-full hover:bg-[#7c5cd6]/10">
+                    <Star size={22} className={fav ? "fill-[#7c5cd6] text-[#7c5cd6]" : "text-muted"} />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
+
+      <Sheet open={importOpen} onOpenChange={setImportOpen}>
+        <SheetContent>
+          <SheetTitle>Import contacts</SheetTitle>
+          <SheetDescription>On the mobile app this reads your real contacts. Import the sample contacts for this demo?</SheetDescription>
+          <p className="mt-4 text-sm text-muted">{PHONE_CONTACTS.length} sample people. Nobody is contacted when you import — you choose up to {MAX_FAVOURITES} favourites, and they're alerted first in an SOS.</p>
+          <div className="mt-6 grid gap-2">
+            <button className="btn-primary" onClick={() => { phone.set({ contactsPerm: "granted" }); setImportOpen(false); toast.success(`Imported ${PHONE_CONTACTS.length} sample contacts`, { description: `Star up to ${MAX_FAVOURITES} favourites.` }); }}>Yes, import sample contacts</button>
+            <button className="btn-ghost" onClick={() => setImportOpen(false)}>Not now</button>
+          </div>
+        </SheetContent>
+      </Sheet>
 
       <Sheet open={!!edit} onOpenChange={(o) => !o && setEdit(null)}>
         <SheetContent>

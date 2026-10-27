@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
-  CHECKIN_REPLY_WINDOW, ESCALATION_SECONDS, FALL_SECONDS, useApp, zonesAt, landmark, notifyNames,
+  CHECKIN_REPLY_WINDOW, ESCALATION_SECONDS, FALL_SECONDS, useApp, zonesAt, landmark, notifyNames, alertChain,
 } from "@/lib/store";
 import { pointAt } from "@/lib/simulation";
 import { alertChime } from "@/lib/sound";
@@ -20,7 +20,7 @@ export default function Engine() {
   // Only for fresh alerts, so restoring a saved SOS after a refresh stays quiet.
   useEffect(() => {
     if (sos && Date.now() - sos.startedAt < 3000) {
-      const n = useApp.getState().contacts.filter((c) => !c.escalation).length;
+      const n = alertChain(useApp.getState().contacts).filter((c) => !c.escalation).length;
       alertChime();
       navigator.vibrate?.([200, 100, 200]);
       toast.success(`Alert sent to ${n} contacts`, { description: "Live location shared · recording started" });

@@ -2,6 +2,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, CheckCheck, Clock, Eye, MessageSquareWarning, Send } from "lucide-react";
 import { useApp } from "@/lib/store";
+import { usePhone, sosChain } from "@/lib/phone-state";
 import { useNow } from "@/lib/hooks";
 import { coordinationAt, coordinationScript, type DeliveryStatus } from "@/lib/simulation";
 import { cn } from "@/lib/utils";
@@ -21,9 +22,11 @@ export function StatusPill({ s }: { s: DeliveryStatus }) {
 
 /** Live view of who has been alerted and how they responded. */
 export function useCoordination() {
-  const { sos, contacts } = useApp();
+  const { sos, contacts: trusted } = useApp();
+  const favourites = usePhone((s) => s.favourites);
   const now = useNow(500);
   if (!sos) return null;
+  const contacts = sosChain(trusted, favourites);
   const elapsed = (now - sos.startedAt) / 1000;
   const primary = contacts.filter((c) => !c.escalation);
   const r = coordinationAt(coordinationScript(contacts, sos.weak), primary.map((c) => c.id), elapsed);
