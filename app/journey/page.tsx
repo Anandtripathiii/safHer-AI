@@ -11,6 +11,7 @@ import { defaultRouteKind, densify, pointAt, type RouteKind, type RouteScore } f
 import { useNow } from "@/lib/hooks";
 import { cn, fmtClock } from "@/lib/utils";
 import PlacePicker from "@/components/PlacePicker";
+import { useT } from "@/lib/i18n";
 
 const LiveMap = dynamic(() => import("@/components/LiveMap"), { ssr: false, loading: () => <div className="h-full w-full animate-pulse bg-pink-soft/20" /> });
 
@@ -34,6 +35,7 @@ const hhmm = (d: Date) => `${String(d.getHours()).padStart(2, "0")}:${String(d.g
 export default function JourneyPage() {
   const { journey, contacts, zones, fallDetection, demoMode, startJourney, endJourney, set } = useApp();
   const now = useNow(1000);
+  const tr = useT();
   const [fromId, setFrom] = useState("hkm");
   const [toId, setTo] = useState("iiitd");
   const [arriveBy, setArriveBy] = useState("");
@@ -61,7 +63,7 @@ export default function JourneyPage() {
   const start = () => {
     if (!notify.length) return toast.error("Pick at least one person to notify");
     startJourney({ fromId, toId, arriveBy, notify, kind });
-    toast.success("Journey started", { description: `Sharing live location with ${contacts.filter((c) => notify.includes(c.id)).map((c) => c.name).join(", ")}` });
+    toast.success(tr("journeyStarted"), { description: `Sharing live location with ${contacts.filter((c) => notify.includes(c.id)).map((c) => c.name).join(", ")}` });
   };
 
   return (
@@ -86,22 +88,22 @@ export default function JourneyPage() {
         {!journey ? (
           <>
             <div className="flex items-center justify-between">
-              <h1 className="text-xl font-semibold">Plan a safe journey</h1>
+              <h1 className="text-xl font-semibold">{tr("planJourney")}</h1>
               <span className="rounded-full bg-pink-soft/60 px-2.5 py-1 text-xs font-medium">~{preview.eta} min</span>
             </div>
             {expanded && (
               <div className="mt-4 space-y-4">
                 <div className="relative space-y-3">
-                  <PlacePicker label="From" value={fromId} onChange={setFrom} exclude={toId} />
+                  <PlacePicker label={tr("from")} value={fromId} onChange={setFrom} exclude={toId} />
                   <button onClick={() => { setFrom(toId); setTo(fromId); }} aria-label="Swap from and to" className="absolute right-2 top-[60px] z-10 grid h-8 w-8 place-items-center rounded-full border border-line bg-surface text-muted hover:text-ink">
                     <ArrowUpDown size={16} />
                   </button>
-                  <PlacePicker label="To" value={toId} onChange={setTo} exclude={fromId} />
+                  <PlacePicker label={tr("to")} value={toId} onChange={setTo} exclude={fromId} />
                 </div>
                 <fieldset>
                   <legend className="flex w-full items-center justify-between">
-                    <span className="label">Route</span>
-                    {night && <span className="flex items-center gap-1 rounded-full bg-ink px-2 py-0.5 text-[11px] font-semibold text-surface"><Moon size={12} />Night routing</span>}
+                    <span className="label">{tr("route")}</span>
+                    {night && <span className="flex items-center gap-1 rounded-full bg-ink px-2 py-0.5 text-[11px] font-semibold text-surface"><Moon size={12} />{tr("nightRouting")}</span>}
                   </legend>
                   <div className="mt-2 grid grid-cols-2 gap-2">
                     {(["fastest", "safer"] as RouteKind[]).map((k) => {
@@ -124,11 +126,11 @@ export default function JourneyPage() {
                   <p className="mt-1.5 text-[11px] text-muted">Scores from sample data — verify with local sources.</p>
                 </fieldset>
                 <div>
-                  <label htmlFor="arrive" className="label">Expected arrival</label>
+                  <label htmlFor="arrive" className="label">{tr("expectedArrival")}</label>
                   <input id="arrive" type="time" className="input mt-1.5" value={arriveBy} onChange={(e) => setArriveBy(e.target.value)} />
                 </div>
                 <fieldset>
-                  <legend className="label">Who should know?</legend>
+                  <legend className="label">{tr("whoShouldKnow")}</legend>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {contacts.map((c) => {
                       const on = notify.includes(c.id);
@@ -144,7 +146,7 @@ export default function JourneyPage() {
                 </fieldset>
               </div>
             )}
-            <button className="btn-primary mt-5 w-full" onClick={start}><ShieldCheck size={20} /> Start journey</button>
+            <button className="btn-primary mt-5 w-full" onClick={start}><ShieldCheck size={20} /> {tr("startJourney")}</button>
             <p className="mt-3 text-center text-xs text-muted">We'll check in every 2 minutes. {demoMode && "Demo mode: trip runs 10× faster."}</p>
           </>
         ) : (
@@ -157,6 +159,7 @@ export default function JourneyPage() {
 
 function ActiveJourney({ now, expanded, fallDetection, onFall, onEnd }: { now: number; expanded: boolean; fallDetection: boolean; onFall: () => void; onEnd: (arrived: boolean) => void }) {
   const { journey, contacts, demoMode } = useApp();
+  const tr = useT();
   if (!journey) return null;
   const pct = Math.round(journey.progress * 100);
   const left = Math.max(0, Math.ceil(journey.etaMin * (1 - journey.progress) / (demoMode ? 10 : 1)));
@@ -199,8 +202,8 @@ function ActiveJourney({ now, expanded, fallDetection, onFall, onEnd }: { now: n
         </>
       )}
       <div className="mt-4 grid grid-cols-2 gap-2">
-        <button className="btn-primary" onClick={() => onEnd(true)}>I've arrived</button>
-        <button className="btn-secondary" onClick={() => onEnd(false)}>End journey</button>
+        <button className="btn-primary" onClick={() => onEnd(true)}>{tr("arrived")}</button>
+        <button className="btn-secondary" onClick={() => onEnd(false)}>{tr("endJourney")}</button>
       </div>
       <div className="mt-2 flex gap-2">
         <Link href="/map" className="btn-ghost h-10 flex-1 text-sm"><MapIcon size={18} /> Live map</Link>
