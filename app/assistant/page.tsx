@@ -18,7 +18,10 @@ export default function AssistantPage() {
   const end = useRef<HTMLDivElement>(null);
   const idRef = useRef(1);
 
-  useEffect(() => end.current?.scrollIntoView({ behavior: "smooth", block: "end" }), [msgs, typing]);
+  // Braces matter: newer browsers return a Promise from scrollIntoView, which React would call as a cleanup.
+  useEffect(() => {
+    end.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [msgs, typing]);
 
   const send = (text: string) => {
     const q = text.trim();
