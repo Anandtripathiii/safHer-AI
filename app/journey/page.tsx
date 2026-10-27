@@ -3,15 +3,31 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowUpDown, Clock, Flag, Map as MapIcon, PersonStanding, ShieldCheck, Timer } from "lucide-react";
+import { AlertTriangle, ArrowUpDown, Clock, Flag, Footprints, Lightbulb, Map as MapIcon, Moon, PersonStanding, ShieldAlert, ShieldCheck, Timer, Zap } from "lucide-react";
 import { toast } from "sonner";
-import { landmark, useApp } from "@/lib/store";
-import { densify, etaMinutes, pointAt, routeFor } from "@/lib/simulation";
+import { journeyOptions, landmark, useApp } from "@/lib/store";
+import { usePhone } from "@/lib/phone-state";
+import { defaultRouteKind, densify, pointAt, type RouteKind, type RouteScore } from "@/lib/simulation";
 import { useNow } from "@/lib/hooks";
 import { cn, fmtClock } from "@/lib/utils";
 import PlacePicker from "@/components/PlacePicker";
 
 const LiveMap = dynamic(() => import("@/components/LiveMap"), { ssr: false, loading: () => <div className="h-full w-full animate-pulse bg-pink-soft/20" /> });
+
+/** After 7 PM (or the Judge "Night" toggle on /phone-demo) the Safer route becomes the default. */
+const isNight = (ts: number) => { const h = new Date(ts).getHours(); return h >= 19 || h < 6; };
+
+function Chips({ s }: { s: RouteScore }) {
+  const tone = (v: number) => (v >= 70 ? "bg-success/15 text-success" : v >= 45 ? "bg-warning/20 text-[#7a5408] dark:text-warning" : "bg-danger/10 text-danger");
+  const chip = "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold";
+  return (
+    <div className="mt-2 flex flex-wrap gap-1">
+      <span className={cn(chip, tone(s.lighting))} title="Lighting score"><Lightbulb size={12} />{s.lighting}</span>
+      <span className={cn(chip, tone(s.footTraffic))} title="Foot traffic score"><Footprints size={12} />{s.footTraffic}</span>
+      <span className={cn(chip, s.incidents30d <= 2 ? "bg-success/15 text-success" : "bg-danger/10 text-danger")} title="Incidents in the last 30 days"><ShieldAlert size={12} />{s.incidents30d} in 30d</span>
+    </div>
+  );
+}
 
 const hhmm = (d: Date) => `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 
@@ -23,16 +39,18 @@ export default function JourneyPage() {
   const [arriveBy, setArriveBy] = useState("");
   const [notify, setNotify] = useState<string[]>(["mom", "priya"]);
   const [expanded, setExpanded] = useState(true);
+  const judgeNight = usePhone((p) => p.night);
+  const night = judgeNight || isNight(now);
+  const [kind, setKind] = useState<RouteKind>("safer");
+  useEffect(() => setKind(defaultRouteKind(night)), [night, fromId, toId]);
 
   useEffect(() => {
     const to = new URLSearchParams(window.location.search).get("to");
     if (to && to !== "hkm") setTo(to);
   }, []);
 
-  const preview = useMemo(() => {
-    const route = routeFor(landmark(fromId).pos, landmark(toId).pos, fromId, toId);
-    return { route, eta: fromId === "hkm" && toId === "iiitd" ? 15 : etaMinutes(route) };
-  }, [fromId, toId]);
+  const options = useMemo(() => journeyOptions(fromId, toId, night), [fromId, toId, night]);
+  const preview = { route: options[kind].route, eta: options[kind].minutes };
   useEffect(() => setArriveBy(hhmm(new Date(Date.now() + (preview.eta + 5) * 60000))), [preview.eta]);
 
   const route = journey?.route ?? preview.route;
@@ -42,19 +60,24 @@ export default function JourneyPage() {
 
   const start = () => {
     if (!notify.length) return toast.error("Pick at least one person to notify");
-    startJourney({ fromId, toId, arriveBy, notify });
+    startJourney({ fromId, toId, arriveBy, notify, kind });
     toast.success("Journey started", { description: `Sharing live location with ${contacts.filter((c) => notify.includes(c.id)).map((c) => c.name).join(", ")}` });
   };
 
   return (
     <main className="fixed inset-0">
-      <LiveMap routes={[{ id: "r", points: route, color: "#E195AB", active: true, dashed: !journey }]} me={me} destination={dest.pos} zones={zones} fitTo={fit} padTop={120} />
+      <LiveMap
+        routes={journey
+          ? [{ id: "r", points: route, color: "#E195AB", active: true }]
+          : (["fastest", "safer"] as RouteKind[]).map((k) => ({ id: k, points: options[k].route, color: k === "safer" ? "#E195AB" : "#7FA7E0", active: kind === k, dashed: kind !== k, onClick: () => setKind(k), label: `${k === "safer" ? "Safer" : "Fastest"} · ${options[k].minutes} min` }))}
+        me={me} destination={dest.pos} zones={zones} fitTo={fit} padTop={120}
+      />
 
       <motion.section
         initial={{ y: 60, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.22, ease: "easeOut" }}
-        className="absolute inset-x-0 bottom-0 z-[900] mx-auto max-w-lg rounded-t-3xl border border-line/70 bg-surface px-5 pb-24 pt-3 shadow-md md:bottom-6 md:left-6 md:right-auto md:w-[420px] md:rounded-3xl md:pb-5"
+        className="absolute inset-x-0 bottom-0 z-[900] mx-auto max-h-[78vh] max-w-lg overflow-y-auto rounded-t-3xl border border-line/70 bg-surface px-5 pb-24 pt-3 shadow-md md:bottom-6 md:left-6 md:right-auto md:max-h-[calc(100vh-128px)] md:w-[460px] md:rounded-3xl md:pb-5"
       >
         <button onClick={() => setExpanded(!expanded)} className="mx-auto block h-6 w-full" aria-label={expanded ? "Collapse panel" : "Expand panel"}>
           <span className="mx-auto block h-1.5 w-12 rounded-full bg-line" />
@@ -75,6 +98,31 @@ export default function JourneyPage() {
                   </button>
                   <PlacePicker label="To" value={toId} onChange={setTo} exclude={fromId} />
                 </div>
+                <fieldset>
+                  <legend className="flex w-full items-center justify-between">
+                    <span className="label">Route</span>
+                    {night && <span className="flex items-center gap-1 rounded-full bg-ink px-2 py-0.5 text-[11px] font-semibold text-surface"><Moon size={12} />Night routing</span>}
+                  </legend>
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+                    {(["fastest", "safer"] as RouteKind[]).map((k) => {
+                      const o = options[k];
+                      const on = kind === k;
+                      return (
+                        <button key={k} type="button" aria-pressed={on} onClick={() => setKind(k)}
+                          className={cn("rounded-2xl border-2 p-3 text-left transition", on ? "border-pink-strong bg-pink-soft/40" : "border-line hover:bg-bg")}>
+                          <span className="flex items-center gap-1.5 text-sm font-semibold">
+                            {k === "fastest" ? <Zap size={16} className="text-[#5d86c9]" /> : <ShieldCheck size={16} className="text-pink-strong" />}
+                            {k === "fastest" ? `Fastest ${o.minutes} min` : `Safer ${o.minutes} min`}
+                          </span>
+                          <span className="mt-0.5 block text-xs text-muted">{k === "safer" ? "Well-lit, more foot traffic" : "Shortest way there"}</span>
+                          {o.warning && <span className="mt-1.5 flex items-start gap-1 rounded-lg bg-danger/10 px-1.5 py-1 text-[11px] font-semibold leading-tight text-danger"><AlertTriangle size={12} className="mt-px shrink-0" />{o.warning}</span>}
+                          <Chips s={o} />
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="mt-1.5 text-[11px] text-muted">Scores from sample data — verify with local sources.</p>
+                </fieldset>
                 <div>
                   <label htmlFor="arrive" className="label">Expected arrival</label>
                   <input id="arrive" type="time" className="input mt-1.5" value={arriveBy} onChange={(e) => setArriveBy(e.target.value)} />
