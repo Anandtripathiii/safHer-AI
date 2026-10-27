@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, BellRing, Route, UsersRound } from "lucide-react";
+import { ArrowRight, BellRing, PlayCircle, Route, UsersRound } from "lucide-react";
 import { useApp } from "@/lib/store";
 import LocationPill from "@/components/LocationPill";
 import Logo from "@/components/Logo";
@@ -65,6 +65,7 @@ export default function Landing() {
           <div className="mt-9 flex flex-wrap gap-3">
             <Link href="/journey" className="btn-primary h-12 px-6">Start a safe journey <ArrowRight size={18} /></Link>
             <button onClick={startDemo} className="btn-secondary h-12 px-6">Try the 2-minute demo</button>
+            <Link href="/phone-demo?auto=1" className="btn-danger h-14 w-full px-7 text-lg font-bold sm:w-auto"><PlayCircle size={22} /> Play auto demo (2 min)</Link>
           </div>
           <div className="mt-10 flex items-center gap-3">
             <div className="flex -space-x-2">

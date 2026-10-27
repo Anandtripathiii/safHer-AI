@@ -17,7 +17,6 @@ export default function HomeScreen() {
   const now = useNow(1000);
   const [q, setQ] = useState("");
   const [focus, setFocus] = useState(false);
-  const [dest, setDest] = useState<{ name: string; pos: LatLng } | null>(null);
   const locOn = s.locPerm === "once" || s.locPerm === "while";
   const here = phonePosition(s);
 
@@ -26,7 +25,7 @@ export default function HomeScreen() {
     ...LANDMARKS.map((l) => ({ name: l.name, sub: l.area, pos: l.pos, safe: false })),
   ], [s.safePlaces]);
   const matches = destinations.filter((d) => `${d.name} ${d.sub}`.toLowerCase().includes(q.toLowerCase())).slice(0, 6);
-  const pick = (d: { name: string; pos: LatLng }) => { setDest(d); setQ(""); setFocus(false); };
+  const pick = (d: { name: string; pos: LatLng }) => { s.set({ planTo: d }); setQ(""); setFocus(false); };
   const favs = favouriteContacts(s.favourites);
 
   return (
@@ -106,7 +105,7 @@ export default function HomeScreen() {
         </div>
       </div>
 
-      <RouteSheet dest={dest} onClose={() => setDest(null)} />
+      <RouteSheet dest={s.planTo} onClose={() => s.set({ planTo: null })} />
     </div>
   );
 }

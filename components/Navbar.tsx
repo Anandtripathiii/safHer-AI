@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
-  BookUser, Bot, History, Home, LayoutDashboard, Map, MapPin, Moon, Navigation, Search, Settings, ShieldHalf, Siren, Smartphone, Sun, Users, CircleHelp,
+  BookUser, Bot, History, Home, LayoutDashboard, Map, MapPin, Moon, Navigation, Search, Settings, ShieldHalf, Siren, Smartphone, Sun, Users, CircleHelp, PlayCircle,
 } from "lucide-react";
 import { useApp } from "@/lib/store";
 import { LANGS, t, type Key } from "@/lib/i18n";
@@ -14,6 +14,7 @@ import { Switch } from "./ui/switch";
 import { useDeviceBattery } from "@/lib/hooks";
 import { BatteryGlyph } from "./StatusBar";
 import Logo from "./Logo";
+import { AUTO_DEMO_EVENT } from "./AutoDemo";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "./ui/sheet";
 
 export const NAV: { href: string; key: Key; icon: typeof Home }[] = [
@@ -131,6 +132,10 @@ export default function Navbar() {
               <BatteryGlyph level={battery.level} className="text-ink" />{battery.level}%
             </span>
           )}
+          <button className={cn(roundBtn, "hidden text-pink-strong sm:grid")} aria-label="Play auto demo" title="Play auto demo (2 min)"
+            onClick={() => { if (path === "/phone-demo") window.dispatchEvent(new Event(AUTO_DEMO_EVENT)); else router.push("/phone-demo?auto=1"); }}>
+            <PlayCircle size={18} />
+          </button>
           <button className={cn(roundBtn, "hidden sm:grid")} onClick={() => setSearch(true)} aria-label={t("search", lang)} title={`${t("search", lang)} (Ctrl+K)`}>
             <Search size={18} />
           </button>

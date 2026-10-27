@@ -6,6 +6,7 @@ import PhoneApp from "@/components/phone/PhoneApp";
 import PhoneEngine from "@/components/phone/PhoneEngine";
 import JudgeControls from "@/components/JudgeControls";
 import WatcherPhone from "@/components/phone/WatcherPhone";
+import AutoDemo from "@/components/AutoDemo";
 import { useApp } from "@/lib/store";
 import { useSafeWordListener } from "@/lib/voice";
 
@@ -28,6 +29,7 @@ export default function PhoneDemoPage() {
         </PhoneFrame>
         <p className="mt-4 max-w-sm text-center text-xs text-muted">Simulated phone. Nothing here touches your real contacts, location or battery.</p>
       </div>
+      <AutoDemo />
       <div className="flex w-full max-w-md flex-col items-center gap-6">
         {/* Both mirror the same journey: Mom watching from home, Priya on the same group trip. */}
         <div className="flex flex-wrap justify-center gap-4">

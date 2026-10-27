@@ -59,6 +59,7 @@ type State = {
   toast: { text: string; tone: "info" | "ok" | "warn" | "danger"; at: number } | null;
   pulse: number;
   notes: PhoneNote[];
+  planTo: { name: string; pos: LatLng } | null; // destination whose route sheet is open
 };
 
 type Actions = {
@@ -108,6 +109,7 @@ const initial = (): State => ({
   toast: null,
   pulse: 0,
   notes: [],
+  planTo: null,
 });
 
 export const placesAt = (places: SafePlace[], p: LatLng) => places.filter((s) => distM(s.pos, p) <= s.radius).map((s) => s.id);
@@ -192,7 +194,7 @@ export const usePhone = create<State & Actions>()(
       name: "safeher-phone",
       skipHydration: true,
       // Transient UI (toasts, sheets, lock, decoy) shouldn't survive a refresh.
-      partialize: ({ toast, cab, report, locked, decoy, revealed, minimizeAt, pulse, ...rest }) => rest,
+      partialize: ({ toast, cab, report, locked, decoy, revealed, minimizeAt, pulse, planTo, ...rest }) => rest,
     },
   ),
 );
