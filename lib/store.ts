@@ -64,6 +64,9 @@ type State = {
   fakeCallAt: number | null;
   call: { phase: "ringing" | "answered"; since: number } | null;
   webLoc: WebLocation;
+  // Arriving at a safe-place destination collapses the navbar to a bubble after a countdown.
+  minimizeAt: number | null;
+  minimized: boolean;
 };
 
 type Actions = {
@@ -120,6 +123,8 @@ const initial = (): State => {
     fakeCallAt: null,
     call: null,
     webLoc: { status: "idle" },
+    minimizeAt: null,
+    minimized: false,
   };
 };
 
@@ -194,7 +199,7 @@ export const useApp = create<State & Actions>()(
         set({
           sos: { id: uid(), startedAt: now, source, weak: get().weakNetwork },
           sharing: get().sharing ?? { startedAt: now, minutes: SHARE_MINUTES },
-          risk: null, checkin: null, fall: null,
+          risk: null, checkin: null, fall: null, minimized: false, minimizeAt: null,
         });
         get().log({ type: "sos", title: `SOS — ${source}`, detail: "Alert in progress · recording started", status: "active", notified: contacts.filter((c) => !c.escalation).map((c) => c.name) });
       },
@@ -250,7 +255,8 @@ export const useApp = create<State & Actions>()(
       name: "safeher",
       skipHydration: true,
       // Never write real coordinates to storage; only whether permission was granted or denied.
-      partialize: (s) => ({ ...s, webLoc: { status: s.webLoc.status === "asking" ? "idle" : s.webLoc.status } }),
+      // Minimised state is per-visit: a refresh always shows the full navbar.
+      partialize: (s) => ({ ...s, webLoc: { status: s.webLoc.status === "asking" ? "idle" : s.webLoc.status }, minimized: false, minimizeAt: null }),
     },
   ),
 );
