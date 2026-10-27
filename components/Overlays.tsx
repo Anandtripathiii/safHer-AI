@@ -10,6 +10,7 @@ import { useNow } from "@/lib/hooks";
 import { fmtClock, cn } from "@/lib/utils";
 import { playCallerVoice, startRingtone } from "@/lib/sound";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "./ui/sheet";
+import { useT } from "@/lib/i18n";
 
 export function Waveform({ bars = 24, className }: { bars?: number; className?: string }) {
   return (
@@ -44,6 +45,7 @@ export const riskTone = (score: number) => (score >= 70 ? "danger" : score >= 45
 export const TONE_PILL = { danger: "bg-danger/15 text-danger", warning: "bg-warning/20 text-[#9a6a0c] dark:text-warning", success: "bg-success/15 text-success" };
 
 export function WhyDrawer({ risk, open, onOpenChange }: { risk: Risk | null; open: boolean; onOpenChange: (o: boolean) => void }) {
+  const tr = useT();
   if (!risk) return null;
   const hour = new Date(risk.at).getHours();
   const night = hour >= 21 || hour < 5;
@@ -57,7 +59,7 @@ export function WhyDrawer({ risk, open, onOpenChange }: { risk: Risk | null; ope
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent>
-        <SheetTitle>Why this alert?</SheetTitle>
+        <SheetTitle>{tr("whyAlert")}</SheetTitle>
         <SheetDescription>Risk score {risk.score}/100 · confidence {risk.confidence.toLowerCase()}</SheetDescription>
         <ul className="mt-6 space-y-4">
           {rows.map((r) => (
@@ -86,6 +88,7 @@ export function WhyDrawer({ risk, open, onOpenChange }: { risk: Risk | null; ope
 
 function RiskCard() {
   const { risk, respondRisk } = useApp();
+  const tr = useT();
   const [why, setWhy] = useState(false);
   const tone = risk ? riskTone(risk.score) : "success";
   return (
@@ -124,11 +127,11 @@ function RiskCard() {
                 </p>
               )}
               <div className="mt-4 grid grid-cols-3 gap-2">
-                <button className="btn-secondary h-10 px-2 text-sm" onClick={() => { respondRisk("safe"); toast.success("Glad you're safe", { description: "We'll keep watching quietly." }); }}>I'm safe</button>
-                <button className="btn-danger h-10 px-2 text-sm" onClick={() => respondRisk("sos")}>Send SOS</button>
-                <button className="btn-ghost h-10 px-2 text-sm" onClick={() => respondRisk("watch")}>Keep watching</button>
+                <button className="btn-secondary h-14 px-2 text-base font-semibold" onClick={() => { respondRisk("safe"); toast.success("Glad you're safe", { description: "We'll keep watching quietly." }); }}>{tr("imSafe")}</button>
+                <button className="btn-danger h-14 px-2 text-base font-bold" onClick={() => respondRisk("sos")}>{tr("sendSos")}</button>
+                <button className="btn-ghost h-14 px-2 text-base" onClick={() => respondRisk("watch")}>{tr("keepWatching")}</button>
               </div>
-              <button onClick={() => setWhy(true)} className="mt-3 text-sm font-medium text-pink-strong underline-offset-4 hover:underline">Why this alert?</button>
+              <button onClick={() => setWhy(true)} className="mt-3 text-sm font-medium text-pink-strong underline-offset-4 hover:underline">{tr("whyAlert")}</button>
             </div>
           </motion.div>
         )}
@@ -140,6 +143,7 @@ function RiskCard() {
 
 function CheckIn() {
   const { checkin, answerCheckin } = useApp();
+  const tr = useT();
   const now = useNow(250);
   if (!checkin) return null;
   const age = (now - checkin.since) / 1000;
@@ -150,10 +154,10 @@ function CheckIn() {
         <div className="card flex items-center gap-4 p-4 shadow-md">
           <Ring value={left / 30} size={48} stroke={5} color="rgb(var(--pink-strong))"><span className="text-xs font-semibold tabular-nums">{Math.ceil(left)}</span></Ring>
           <div className="flex-1">
-            <p className="font-semibold">Still safe?</p>
-            <p className="text-sm text-muted">Tap yes so we don't worry. Routine check-in.</p>
+            <p className="font-semibold">{tr("stillSafe")}</p>
+            <p className="text-sm text-muted">{tr("stillSafeHint")}</p>
           </div>
-          <button className="btn-primary h-11" onClick={answerCheckin}>Yes</button>
+          <button className="btn-primary h-14 px-6 text-base font-bold" onClick={answerCheckin}>{tr("yes")}</button>
         </div>
       </motion.div>
     );
@@ -165,12 +169,12 @@ function CheckIn() {
         <div className="flex items-center gap-4">
           <Ring value={left / ESCALATION_SECONDS} size={72} color="#fff"><span className="text-lg font-bold tabular-nums">{fmtClock(left)}</span></Ring>
           <div>
-            <p className="text-lg font-semibold">Missed check-in</p>
-            <p className="text-sm text-white/85">SOS will be sent to your trusted contacts when this reaches zero.</p>
+            <p className="text-lg font-semibold">{tr("missedCheckin")}</p>
+            <p className="text-sm text-white/85">{tr("missedCheckinHint")}</p>
           </div>
         </div>
         <button className="btn mt-4 w-full bg-white font-semibold text-danger hover:bg-white/90" onClick={() => { answerCheckin(); toast.success("Escalation cancelled"); }}>
-          Cancel — I'm safe
+          {tr("cancelImSafe")}
         </button>
       </motion.div>
     </div>
@@ -179,6 +183,7 @@ function CheckIn() {
 
 function FallCheck() {
   const { fall, set, fireSOS, log } = useApp();
+  const tr = useT();
   const now = useNow(250);
   if (!fall) return null;
   const left = FALL_SECONDS - (now - fall.since) / 1000;
@@ -186,11 +191,11 @@ function FallCheck() {
     <div className="fixed inset-0 z-[1200] grid place-items-center bg-ink/60 p-4 backdrop-blur-sm" role="alertdialog" aria-label="Are you okay?">
       <motion.div initial={{ scale: 0.94, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="card w-full max-w-sm p-6 text-center">
         <div className="mx-auto w-fit"><Ring value={left / FALL_SECONDS} size={96} stroke={8}><span className="text-2xl font-bold tabular-nums">{Math.ceil(left)}</span></Ring></div>
-        <h2 className="mt-4 text-xl font-semibold">Are you okay?</h2>
+        <h2 className="mt-4 text-xl font-semibold">{tr("areYouOk")}</h2>
         <p className="mt-1 text-muted">We noticed a sudden impact. If you don't answer, we'll send an SOS.</p>
         <div className="mt-6 grid gap-2">
-          <button className="btn-primary" onClick={() => { set({ fall: null }); log({ type: "fall", title: "Possible fall detected", detail: `Answered “I'm okay” in ${Math.round(FALL_SECONDS - left)}s`, status: "cancelled", notified: [] }); }}>I'm okay</button>
-          <button className="btn-danger" onClick={() => fireSOS("Possible fall")}>Send help now</button>
+          <button className="btn-primary" onClick={() => { set({ fall: null }); log({ type: "fall", title: "Possible fall detected", detail: `Answered “I'm okay” in ${Math.round(FALL_SECONDS - left)}s`, status: "cancelled", notified: [] }); }}>{tr("imOk")}</button>
+          <button className="btn-danger" onClick={() => fireSOS("Possible fall")}>{tr("sendHelpNow")}</button>
         </div>
       </motion.div>
     </div>
@@ -241,6 +246,7 @@ function FakeCall() {
 
 function SosBar() {
   const { sos, resolveSOS } = useApp();
+  const tr = useT();
   const path = usePathname();
   const now = useNow(1000);
   if (!sos || path === "/sos") return null;
@@ -248,16 +254,16 @@ function SosBar() {
     <div className="fixed inset-x-3 top-[88px] z-[990] mx-auto max-w-5xl">
       <div className="flex items-center gap-3 rounded-2xl bg-danger px-4 py-2.5 text-sm text-white shadow-md">
         <motion.span animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.2, repeat: Infinity }}><Siren size={18} /></motion.span>
-        <span className="font-semibold">SOS active</span>
+        <span className="font-semibold">{tr("sosActive")}</span>
         <span className="hidden items-center gap-2 rounded-full bg-white/15 px-2.5 py-0.5 sm:flex">
           <span className="h-2 w-2 rounded-full bg-white" /> REC {fmtClock((now - sos.startedAt) / 1000)}
           <Waveform bars={10} className="h-4 text-white/80" />
         </span>
         <span className="tabular-nums sm:hidden">REC {fmtClock((now - sos.startedAt) / 1000)}</span>
         <div className="ml-auto flex items-center gap-1">
-          {path !== "/map" && <Link href="/map" className="flex items-center gap-1 rounded-full px-2.5 py-1 hover:bg-white/15"><Eye size={16} /> <span className="hidden sm:inline">Live</span></Link>}
-          <button className="rounded-full bg-white px-3 py-1 font-semibold text-danger" onClick={() => { resolveSOS(false); toast.success("Alert resolved", { description: "Recording saved to your Evidence Vault." }); }}>
-            <span className="hidden sm:inline">I'm safe now</span><span className="sm:hidden">Safe</span>
+          {path !== "/map" && <Link href="/map" className="flex items-center gap-1 rounded-full px-2.5 py-1 hover:bg-white/15"><Eye size={16} /> <span className="hidden sm:inline">{tr("live")}</span></Link>}
+          <button className="rounded-full bg-white px-3 py-1 font-semibold text-danger" onClick={() => { resolveSOS(false); toast.success(tr("alertResolved"), { description: tr("recordingSaved") }); }}>
+            <span className="hidden sm:inline">{tr("imSafeNow")}</span><span className="sm:hidden">Safe</span>
           </button>
         </div>
       </div>
