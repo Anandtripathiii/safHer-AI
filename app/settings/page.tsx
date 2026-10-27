@@ -1,12 +1,13 @@
 "use client";
 import { useState } from "react";
-import { MapPin, PhoneIncoming, RotateCcw, Trash2 } from "lucide-react";
+import { House, PhoneIncoming, RotateCcw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useApp } from "@/lib/store";
 import { LANDMARKS } from "@/lib/seed";
 import { LANGS } from "@/lib/i18n";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+import PlacePicker from "@/components/PlacePicker";
 
 function Group({ title, desc, children }: { title: string; desc?: string; children: React.ReactNode }) {
   return (
@@ -43,7 +44,7 @@ export default function SettingsPage() {
   const addZone = () => {
     if (!zoneName.trim()) return toast.error("Give the zone a name, like “Gym” or “Nani's house”");
     s.addZone({ name: zoneName.trim(), pos: LANDMARKS.find((l) => l.id === zonePlace)!.pos, radius: zoneRadius });
-    toast.success(`${zoneName.trim()} added`, { description: "It now shows on your map as a pink circle." });
+    toast.success(`${zoneName.trim()} added as a safe place`, { description: "Arriving here at the end of a journey minimises SafeHer to save battery." });
     setZoneName("");
   };
 
@@ -73,28 +74,29 @@ export default function SettingsPage() {
           </Row>
         </Group>
 
-        <Group title="Safe zones" desc="Entering or leaving one during a journey tells your contacts automatically.">
+        <Group title="Safe places" desc="Entering or leaving one during a journey tells your contacts automatically. Arriving at one as your destination minimises SafeHer after 10 seconds.">
           <ul className="space-y-2">
             {s.zones.map((z) => (
               <li key={z.id} className="flex items-center gap-3 rounded-2xl bg-surface px-4 py-3 shadow-sm">
-                <span className="h-4 w-4 rounded-full border-2 border-pink-strong bg-pink-soft" />
-                <span className="flex-1"><b className="font-medium">{z.name}</b> <span className="text-sm text-muted">· {z.radius} m radius</span></span>
+                <House size={18} className="text-pink-strong" />
+                <span className="flex-1"><b className="font-medium">{z.name}</b> <span className="text-sm text-muted">· {LANDMARKS.find((l) => l.pos[0] === z.pos[0] && l.pos[1] === z.pos[1])?.name ?? "Custom spot"} · {z.radius} m</span></span>
                 <button className="btn-ghost h-9 w-9 px-0 text-danger" aria-label={`Remove ${z.name}`} onClick={() => { s.removeZone(z.id); toast(`${z.name} removed`, { action: { label: "Undo", onClick: () => s.addZone(z) } }); }}><Trash2 size={18} /></button>
               </li>
             ))}
           </ul>
-          <form className="grid gap-2 sm:grid-cols-[1fr_1fr_auto_auto]" onSubmit={(e) => { e.preventDefault(); addZone(); }}>
-            <input className="input" placeholder="Zone name, e.g. Gym" value={zoneName} onChange={(e) => setZoneName(e.target.value)} aria-label="Zone name" />
-            <div className="relative">
-              <MapPin size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-pink-strong" />
-              <select className="input pl-9" value={zonePlace} onChange={(e) => setZonePlace(e.target.value)} aria-label="Zone location">
-                {LANDMARKS.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
+          <form className="grid items-end gap-3 sm:grid-cols-[1fr_1.3fr_auto_auto]" onSubmit={(e) => { e.preventDefault(); addZone(); }}>
+            <div>
+              <label htmlFor="zn" className="label">Name</label>
+              <input id="zn" className="input mt-1.5" placeholder="e.g. Gym, Nani's house" value={zoneName} onChange={(e) => setZoneName(e.target.value)} />
+            </div>
+            <PlacePicker label="Address" value={zonePlace} onChange={setZonePlace} />
+            <div>
+              <label htmlFor="zr" className="label block">Radius</label>
+              <select id="zr" className="input mt-1.5 w-auto" value={zoneRadius} onChange={(e) => setZoneRadius(+e.target.value)}>
+                {[200, 300, 500, 800].map((r) => <option key={r} value={r}>{r} m</option>)}
               </select>
             </div>
-            <select className="input w-auto" value={zoneRadius} onChange={(e) => setZoneRadius(+e.target.value)} aria-label="Radius">
-              {[200, 300, 500, 800].map((r) => <option key={r} value={r}>{r} m</option>)}
-            </select>
-            <button className="btn-primary">Add zone</button>
+            <button className="btn-primary">Add place</button>
           </form>
         </Group>
 
