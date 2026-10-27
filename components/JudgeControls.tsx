@@ -1,5 +1,5 @@
 "use client";
-import { BatteryMedium, MapPin, Signal } from "lucide-react";
+import { BatteryMedium, MapPin, Moon, Signal, Sun } from "lucide-react";
 import { usePhone, type Network } from "@/lib/phone-state";
 import { TELEPORTS, type TeleportKey } from "@/lib/seed";
 import { distM } from "@/lib/simulation";
@@ -59,6 +59,19 @@ function NetworkGroup() {
   );
 }
 
+function TimeGroup() {
+  const { night, set } = usePhone();
+  return (
+    <Group icon={night ? Moon : Sun} title="Time">
+      <div className="flex gap-1.5">
+        <button onClick={() => set({ night: false })} className={seg(!night)}><Sun size={16} className="mr-1 inline" />Day</button>
+        <button onClick={() => set({ night: true })} className={seg(night)}><Moon size={16} className="mr-1 inline" />Night</button>
+      </div>
+      <p className="mt-1 text-xs text-muted">{night ? "Safer route is the default; Fastest shows a warning and its lighting/foot-traffic scores drop." : "Both routes are reasonable; Fastest is suggested."}</p>
+    </Group>
+  );
+}
+
 /** Right-hand panel on /phone-demo: every simulated state, grouped. */
 export default function JudgeControls() {
   return (
@@ -70,6 +83,7 @@ export default function JudgeControls() {
       <BatteryGroup />
       <LocationGroup />
       <NetworkGroup />
+      <TimeGroup />
     </aside>
   );
 }
