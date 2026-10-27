@@ -7,12 +7,14 @@ import { toast } from "sonner";
 import { useApp } from "@/lib/store";
 import { useNow } from "@/lib/hooks";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "./ui/sheet";
+import { useT } from "@/lib/i18n";
 
 export default function QuickActions() {
   const path = usePathname();
   const [open, setOpen] = useState(false);
   const { fakeCallAt, fakeCaller, fakeCallDelay, sharing, set, startSharing, minimized } = useApp();
   const now = useNow(1000);
+  const tr = useT();
   if (path === "/sos" || path === "/assistant" || path === "/phone-demo" || minimized) return null; // minimised: the SafeHer bubble owns this corner
 
   const scheduleCall = () => {
@@ -26,7 +28,7 @@ export default function QuickActions() {
     <>
       <button
         onClick={() => setOpen(true)}
-        aria-label="Quick actions"
+        aria-label={tr("quickActions")}
         // On mobile the map screens use the bottom of the screen for their sheet.
         className={`fixed bottom-24 right-4 z-[995] ${["/journey", "/map"].includes(path) ? "hidden md:grid" : "grid"} h-14 w-14 place-items-center rounded-full bg-pink-strong text-white shadow-md transition hover:brightness-95 md:bottom-6 md:right-6`}
       >
@@ -39,7 +41,7 @@ export default function QuickActions() {
       </button>
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="bottom" className="mx-auto max-w-lg">
-          <SheetTitle>Quick actions</SheetTitle>
+          <SheetTitle>{tr("quickActions")}</SheetTitle>
           <SheetDescription>One tap, no fuss.</SheetDescription>
           <div className="mt-5 grid gap-2">
             {fakeCallAt ? (
