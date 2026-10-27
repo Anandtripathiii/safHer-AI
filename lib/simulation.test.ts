@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { CONTACTS, ROUTE_WAYPOINTS } from "./seed.ts";
 import { matchQA } from "./assistant.ts";
+import { calculate } from "./calc.ts";
+import { routeScores, routesFor } from "./simulation.ts";
 import { coordinationAt, coordinationScript, pointAt, NO_RESPONSE_AFTER } from "./simulation.ts";
 
 const primary = CONTACTS.filter((c) => !c.escalation).map((c) => c.id);
@@ -33,4 +35,16 @@ assert.equal(matchQA("which route is safer", "en")!.id, "route");
 assert.equal(matchQA("मुझे कौन ट्रैक कर रहा है?", "hi")!.id, "tracking");
 assert.equal(matchQA("জরুরি নম্বর", "bn")!.id, "numbers");
 assert.equal(matchQA("what's the weather", "en"), null);
+// disguise calculator
+assert.equal(calculate("12+3×4"), 24);
+assert.equal(calculate("10÷4−1"), 1.5);
+assert.equal(calculate("7"), 7);
+assert.equal(calculate("5+"), null);
+assert.ok(Number.isNaN(calculate("1÷0")!));
+
+// night routing: fastest gets a warning only after dark; safer always takes 3 min longer
+assert.ok(routeScores("fastest", true, 12).warning);
+assert.equal(routeScores("fastest", false, 12).warning, undefined);
+assert.equal(routeScores("safer", true, 12).minutes, 15);
+assert.equal(routesFor([0, 0], [1, 1]).fastest.length, 3);
 console.log("simulation tests passed");

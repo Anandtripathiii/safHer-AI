@@ -9,6 +9,8 @@ import HomeScreen from "./HomeScreen";
 import MapScreen from "./MapScreen";
 import SosScreen from "./SosScreen";
 import ContactsScreen from "./ContactsScreen";
+import ProfileScreen from "./ProfileScreen";
+import { CabScan, DisguiseCalculator, IncidentReport, LockScreen, NotificationShade, PhoneRiskCard } from "./PhoneOverlays";
 import { Decoy, LocationPrompt, PhoneToast, Springboard } from "./PhoneSystem";
 
 const TABS: { id: Tab; label: string; icon: typeof Home }[] = [
@@ -19,7 +21,7 @@ const TABS: { id: Tab; label: string; icon: typeof Home }[] = [
   { id: "profile", label: "Profile", icon: UserRound },
 ];
 
-const SCREENS: Partial<Record<Tab, () => JSX.Element>> = { home: HomeScreen, map: MapScreen, sos: SosScreen, contacts: ContactsScreen };
+const SCREENS: Partial<Record<Tab, () => JSX.Element>> = { home: HomeScreen, map: MapScreen, sos: SosScreen, contacts: ContactsScreen, profile: ProfileScreen };
 
 function TabBar() {
   const { tab, set, favourites, say } = usePhone();
@@ -85,9 +87,12 @@ export default function PhoneApp() {
   const { tab, fireSOS } = usePhone();
   const Screen = SCREENS[tab];
   const taps = useRef<{ t: number; x: number; y: number }[]>([]);
+  const [shade, setShade] = useState(false);
+  const pullFrom = useRef<number | null>(null);
 
   // Silent SOS: three quick taps in roughly the same spot, anywhere on screen.
   const onTap = (e: React.PointerEvent) => {
+    if ((e.target as HTMLElement).closest("[data-no-tripletap]")) return; // calculator keys get tapped fast on purpose
     const now = Date.now();
     const recent = taps.current.filter((p) => now - p.t < 700 && Math.hypot(p.x - e.clientX, p.y - e.clientY) < 40);
     taps.current = [...recent, { t: now, x: e.clientX, y: e.clientY }];
@@ -96,7 +101,14 @@ export default function PhoneApp() {
 
   return (
     <div className="contents" onPointerDownCapture={onTap}>
-      <StatusBar />
+      <div
+        onPointerDown={(e) => { pullFrom.current = e.clientY; }}
+        onPointerMove={(e) => { if (pullFrom.current !== null && e.clientY - pullFrom.current > 30) { pullFrom.current = null; setShade(true); } }}
+        onPointerUp={() => { pullFrom.current = null; }}
+        className="touch-none"
+      >
+        <StatusBar onPull={() => setShade(true)} />
+      </div>
       {/* Not `relative`: in-app sheets position against the whole phone screen. */}
       <main className="no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain">
         {Screen ? <Screen /> : <div className="p-5 text-muted">Loading…</div>}
@@ -104,7 +116,13 @@ export default function PhoneApp() {
       <TabBar />
       <PhoneToast />
       <LocationPrompt />
+      <PhoneRiskCard />
+      <CabScan />
+      <IncidentReport />
+      <DisguiseCalculator />
       <Springboard />
+      <LockScreen />
+      <NotificationShade open={shade} onClose={() => setShade(false)} />
       <Decoy />
     </div>
   );

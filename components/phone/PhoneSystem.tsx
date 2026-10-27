@@ -16,8 +16,9 @@ const TONE = {
 };
 
 export function PhoneToast() {
-  const { toast, set, minimizeAt } = usePhone();
+  const { toast, set, minimizeAt, disguise, revealed } = usePhone();
   const now = useNow(250);
+  const hidden = disguise && !revealed; // a SafeHer toast over the fake calculator would give the disguise away
   useEffect(() => {
     if (!toast) return;
     const t = setTimeout(() => set({ toast: null }), minimizeAt ? MINIMIZE_SECONDS * 1000 : 3800);
@@ -26,7 +27,7 @@ export function PhoneToast() {
   const tone = toast ? TONE[toast.tone] : TONE.info;
   return (
     <AnimatePresence>
-      {toast && (
+      {toast && !hidden && (
         <motion.div key={toast.at} initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ duration: 0.2 }} className="absolute inset-x-3 top-[54px] z-[75]">
           <div role="status" className={cn("flex items-start gap-2.5 rounded-2xl px-4 py-3 text-[15px] font-semibold shadow-md", tone.cls)}>
             <tone.icon size={20} className="mt-0.5 shrink-0" />
