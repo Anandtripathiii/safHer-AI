@@ -75,6 +75,7 @@ type Actions = {
   resetPermissions: () => void;
   addSafePlace: (p: Omit<SafePlace, "id">) => void;
   removeSafePlace: (id: string) => void;
+  reset: () => void;
 };
 
 const initial = (): State => ({
@@ -185,6 +186,7 @@ export const usePhone = create<State & Actions>()(
       resetPermissions: () => set({ locPerm: "unasked", contactsPerm: "unasked" }),
       addSafePlace: (p) => set((s) => ({ safePlaces: [...s.safePlaces, { ...p, id: uid() }] })),
       removeSafePlace: (id) => set((s) => ({ safePlaces: s.safePlaces.filter((p) => p.id !== id) })),
+      reset: () => set(initial()),
     }),
     {
       name: "safeher-phone",
