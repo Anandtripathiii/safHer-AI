@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import {
   BookUser, Bot, History, Home, LayoutDashboard, Map, MapPin, Moon, Navigation, Search, Settings, ShieldHalf, Siren, Smartphone, Sun, Users, CircleHelp,
 } from "lucide-react";
@@ -61,7 +62,7 @@ function IconLink({ href, label, icon: Icon, active }: { href: string; label: st
 export default function Navbar() {
   const path = usePathname();
   const router = useRouter();
-  const { theme, demoMode, lang, set } = useApp();
+  const { theme, demoMode, lang, set, minimized } = useApp();
   const [menu, setMenu] = useState(false);
   const [search, setSearch] = useState(false);
   const [help, setHelp] = useState(false);
@@ -86,6 +87,23 @@ export default function Navbar() {
   const go = (href: string) => { setSearch(false); setQ(""); router.push(href); };
 
   const roundBtn = "grid h-10 w-10 place-items-center rounded-full text-muted transition hover:bg-pink-soft/50 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-strong";
+
+  // "App minimised" on the web: the whole navbar collapses into one soft-pulsing bubble.
+  if (minimized) {
+    return (
+      <motion.button
+        onClick={() => set({ minimized: false })}
+        aria-label="SafeHer running — tap to restore"
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: [1, 1.05, 1] }}
+        transition={{ scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }, opacity: { duration: 0.25 } }}
+        className="fixed bottom-6 right-6 z-[1000] flex h-14 items-center gap-2 rounded-full bg-surface pl-2 pr-5 text-sm font-semibold text-ink shadow-md ring-1 ring-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-strong"
+      >
+        <span className="grid h-10 w-10 place-items-center rounded-full bg-pink-strong text-white"><ShieldHalf size={20} /></span>
+        SafeHer running
+      </motion.button>
+    );
+  }
 
   return (
     <>
