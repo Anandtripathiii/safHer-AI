@@ -1,10 +1,10 @@
 "use client";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Lock, LockOpen, Mic } from "lucide-react";
+import { FileText, Loader2, Lock, LockOpen, Mic } from "lucide-react";
 import { toast } from "sonner";
 import { useApp } from "@/lib/store";
-import type { EventType } from "@/lib/seed";
+import type { EventType, SafeEvent } from "@/lib/seed";
 import { TYPE_ICON, TYPE_TINT } from "@/components/eventMeta";
 import { Waveform } from "@/components/Overlays";
 import { cn, fmtClock, fmtDate, fmtTime } from "@/lib/utils";
@@ -29,7 +29,23 @@ const STATUS_CLS: Record<string, string> = {
 const monthKey = (ts: number) => new Date(ts).toLocaleDateString("en-IN", { month: "long", year: "numeric" });
 
 export default function HistoryPage() {
-  const { events, evidence, safeWord } = useApp();
+  const { events, evidence, safeWord, contacts, weakNetwork } = useApp();
+  const [making, setMaking] = useState<string | null>(null);
+
+  const policeReport = async (e: SafeEvent) => {
+    setMaking(e.id);
+    try {
+      // Recording length comes from the matching Evidence Vault entry when there is one.
+      const ev = evidence.find((x) => Math.abs(x.ts - e.ts) < 5000);
+      const { downloadPoliceReport } = await import("@/lib/police-report");
+      const r = await downloadPoliceReport({ event: e, durationSec: ev?.durationSec ?? 60, contacts, network: weakNetwork ? "weak" : "good" });
+      toast.success(`Report ${r.reportNo} downloaded`, { description: "Sample document — review it before using it for a real complaint." });
+    } catch {
+      toast.error("Couldn't create the report. Please try again.");
+    } finally {
+      setMaking(null);
+    }
+  };
   const [type, setType] = useState<EventType | "all">("all");
   const [month, setMonth] = useState("all");
   const [unlocking, setUnlocking] = useState<string | null>(null);
@@ -119,6 +135,11 @@ export default function HistoryPage() {
                   <span className={cn("rounded-full px-2 py-0.5 font-semibold capitalize", STATUS_CLS[e.status])}>{e.status.replace("-", " ")}</span>
                 </div>
                 <p className="col-start-2 text-xs text-muted">{e.notified.length ? `Notified: ${e.notified.join(", ")}` : "No one was notified"}</p>
+                {e.type === "sos" && e.status !== "active" && (
+                  <button onClick={() => policeReport(e)} disabled={making === e.id} className="col-start-2 mt-1 inline-flex w-fit items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs font-semibold hover:bg-pink-soft/40 disabled:opacity-60">
+                    {making === e.id ? <Loader2 size={14} className="animate-spin" /> : <FileText size={14} className="text-pink-strong" />} Police report (PDF)
+                  </button>
+                )}
               </div>
             );
           })}
