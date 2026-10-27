@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import Coordination from "@/components/Coordination";
 import { ago, cn, fmtClock } from "@/lib/utils";
 import { useNow } from "@/lib/hooks";
+import { useT } from "@/lib/i18n";
 
 // Seeded last-7-days delivery rates per channel (%). Weak network drops push/in-app hard; SMS holds up.
 const CHANNELS = {
@@ -41,6 +42,7 @@ function Stat({ icon: I, label, value, hint, tone }: { icon: typeof Siren; label
 export default function Dashboard() {
   const { journey, events, contacts, weakNetwork, sos, risk, checkin, set, resolveSOS, respondRisk, answerCheckin } = useApp();
   const now = useNow(1000);
+  const tr = useT();
   const today = new Date(now).toDateString();
   const alertsToday = events.filter((e) => (e.type === "alert" || e.type === "sos") && new Date(e.ts).toDateString() === today).length + (risk ? 1 : 0);
   const channels = CHANNELS[weakNetwork ? "weak" : "normal"];
@@ -53,12 +55,12 @@ export default function Dashboard() {
     <main className="mx-auto max-w-6xl px-4 pb-32 pt-28 md:pb-16">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold">Emergency dashboard</h1>
+          <h1 className="text-2xl font-semibold">{tr("emergencyDashboard")}</h1>
           <p className="text-sm text-muted">Everything SafeHer is doing for you, live.</p>
         </div>
         <label className={cn("flex items-center gap-3 rounded-full border px-4 py-2 text-sm shadow-sm", weakNetwork ? "border-warning bg-warning/15" : "border-line bg-surface")}>
           {weakNetwork ? <WifiOff size={18} className="text-[#9a6a0c] dark:text-warning" /> : <Wifi size={18} className="text-success" />}
-          Weak network
+          {tr("weakNetwork")}
           <Switch checked={weakNetwork} onCheckedChange={(v) => { set({ weakNetwork: v }); toast(v ? "Simulating weak network" : "Network back to normal", { description: v ? "New alerts will queue and fall back to SMS." : undefined }); }} />
         </label>
       </header>
@@ -71,7 +73,7 @@ export default function Dashboard() {
               <p className="font-semibold">{active.title}</p>
               <p className="text-xs text-muted">Running for {fmtClock((now - active.since) / 1000)}</p>
             </div>
-            <button className="btn-secondary h-10 text-sm" onClick={active.cancel}>Cancel false alarm</button>
+            <button className="btn-secondary h-10 text-sm" onClick={active.cancel}>{tr("cancelFalseAlarm")}</button>
           </motion.section>
         )}
       </AnimatePresence>
