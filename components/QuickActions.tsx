@@ -13,7 +13,7 @@ export default function QuickActions() {
   const [open, setOpen] = useState(false);
   const { fakeCallAt, fakeCaller, fakeCallDelay, sharing, set, startSharing } = useApp();
   const now = useNow(1000);
-  if (path === "/sos" || path === "/assistant") return null;
+  if (path === "/sos" || path === "/assistant" || path === "/phone-demo") return null;
 
   const scheduleCall = () => {
     set({ fakeCallAt: Date.now() + fakeCallDelay * 1000 });

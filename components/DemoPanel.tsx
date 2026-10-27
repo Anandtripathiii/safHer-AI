@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { ChevronDown, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
 import { useApp } from "@/lib/store";
@@ -9,9 +10,10 @@ import { cn } from "@/lib/utils";
 /** Presenter controls. Only visible while Demo mode is on. */
 export default function DemoPanel() {
   const s = useApp();
+  const path = usePathname();
   // Collapsed by default and after every trigger, so it never sits on top of the page's own controls.
   const [open, setOpen] = useState(false);
-  if (!s.demoMode) return null;
+  if (!s.demoMode || path === "/phone-demo") return null;
 
   const btn = "rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-medium text-ink transition hover:bg-pink-soft/60";
   const actions: [string, () => void][] = [

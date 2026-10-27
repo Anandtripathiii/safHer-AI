@@ -22,13 +22,35 @@ export function densify(points: LatLng[], perSegment = 12): LatLng[] {
   return out;
 }
 
-/** Waypoints for a journey: the hand-drawn Safer route for the demo pair, a gentle curve otherwise. */
-export function routeFor(from: LatLng, to: LatLng, fromId?: string, toId?: string): LatLng[] {
-  if (fromId === "hkm" && toId === "iiitd") return ROUTE_WAYPOINTS.safer;
-  if (fromId === "iiitd" && toId === "hkm") return [...ROUTE_WAYPOINTS.safer].reverse();
-  const mid: LatLng = [(from[0] + to[0]) / 2 - (to[1] - from[1]) * 0.12, (from[1] + to[1]) / 2 + (to[0] - from[0]) * 0.12];
-  return [from, mid, to];
+export type RouteKind = "fastest" | "safer";
+
+/** Both route options: the hand-drawn pair for the demo trip, otherwise a near-direct line vs a wider detour. */
+export function routesFor(from: LatLng, to: LatLng, fromId?: string, toId?: string): Record<RouteKind, LatLng[]> {
+  if (fromId === "hkm" && toId === "iiitd") return ROUTE_WAYPOINTS;
+  if (fromId === "iiitd" && toId === "hkm") return { fastest: [...ROUTE_WAYPOINTS.fastest].reverse(), safer: [...ROUTE_WAYPOINTS.safer].reverse() };
+  const bend = (k: number): LatLng => [(from[0] + to[0]) / 2 - (to[1] - from[1]) * k, (from[1] + to[1]) / 2 + (to[0] - from[0]) * k];
+  return { fastest: [from, bend(0.04), to], safer: [from, bend(-0.16), to] };
 }
+
+/** Waypoints for the Safer option (kept for existing callers). */
+export const routeFor = (from: LatLng, to: LatLng, fromId?: string, toId?: string) => routesFor(from, to, fromId, toId).safer;
+
+export type RouteScore = { minutes: number; lighting: number; footTraffic: number; incidents30d: number; helpPoints: number; warning?: string };
+
+/**
+ * Sample scores for each option. After dark the fastest route loses most of its foot traffic and lighting,
+ * so night mode makes Safer the default and puts a warning on Fastest.
+ */
+export function routeScores(kind: RouteKind, night: boolean, fastestMinutes: number): RouteScore {
+  if (kind === "safer") {
+    return { minutes: fastestMinutes + 3, lighting: night ? 82 : 88, footTraffic: night ? 62 : 78, incidents30d: 1, helpPoints: 9 };
+  }
+  return night
+    ? { minutes: fastestMinutes, lighting: 31, footTraffic: 18, incidents30d: 6, helpPoints: 4, warning: "Not recommended after dark — poorly lit, few people around" }
+    : { minutes: fastestMinutes, lighting: 64, footTraffic: 55, incidents30d: 6, helpPoints: 4 };
+}
+
+export const defaultRouteKind = (night: boolean): RouteKind => (night ? "safer" : "fastest");
 
 export const routeLengthM = (pts: LatLng[]) => pts.slice(1).reduce((s, p, i) => s + distM(pts[i], p), 0);
 

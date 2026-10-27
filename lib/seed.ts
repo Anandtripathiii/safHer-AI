@@ -303,3 +303,39 @@ export const QA_FALLBACK: Record<Lang, string> = {
   hi: "इस बारे में मुझे अभी पक्का नहीं पता। पिछला अलर्ट, कौन ट्रैक कर रहा है, सुरक्षित रास्ते या आपातकालीन नंबर के बारे में पूछें।",
   bn: "এ বিষয়ে আমি এখনও নিশ্চিত নই। শেষ সতর্কতা, কে ট্র্যাক করছে, নিরাপদ রুট বা জরুরি নম্বর নিয়ে জিজ্ঞাসা করুন।",
 };
+
+// ---------- Phone demo ----------
+
+export type PhoneContact = { id: string; name: string; initials: string; phone: string; relation: string; color: string };
+
+/** What "Import from phone contacts" returns. Synthetic names and numbers. */
+export const PHONE_CONTACTS: PhoneContact[] = [
+  { id: "pc1", name: "Neha Didi", initials: "ND", phone: "+91 98100 44712", relation: "Sister", color: "#E195AB" },
+  { id: "pc2", name: "Ritika Sharma", initials: "RS", phone: "+91 99711 20384", relation: "Roommate", color: "#B79CE6" },
+  { id: "pc3", name: "Kabir Mehta", initials: "KM", phone: "+91 98731 66209", relation: "Cousin", color: "#7FA7E0" },
+  { id: "pc4", name: "Mrs. Bhatia", initials: "MB", phone: "+91 98910 51177", relation: "Hostel warden", color: "#4CAF8B" },
+  { id: "pc5", name: "Aisha Khan", initials: "AK", phone: "+91 97170 38842", relation: "Classmate", color: "#F2B23D" },
+  { id: "pc6", name: "Sunita Aunty", initials: "SA", phone: "+91 98112 90431", relation: "Neighbour", color: "#E58F6A" },
+  { id: "pc7", name: "Arjun Tripathi", initials: "AT", phone: "+91 99583 17026", relation: "Brother", color: "#6FB1C9" },
+  { id: "pc8", name: "Dr. Kavita Rao", initials: "KR", phone: "+91 98186 25590", relation: "Family doctor", color: "#9C8CD9" },
+  { id: "pc9", name: "Meera Iyer", initials: "MI", phone: "+91 98999 47318", relation: "Friend", color: "#D98BB5" },
+  { id: "pc10", name: "Rohan (PG owner)", initials: "RO", phone: "+91 98734 80265", relation: "Landlord", color: "#8FB46A" },
+  { id: "pc11", name: "Tanya Gupta", initials: "TG", phone: "+91 97111 62054", relation: "Lab partner", color: "#C99A5B" },
+  { id: "pc12", name: "Vikram Uncle", initials: "VU", phone: "+91 98102 73819", relation: "Uncle", color: "#7C9BB8" },
+];
+
+export type TeleportKey = "home" | "college" | "market" | "metro" | "unsafe";
+export const TELEPORTS: Record<TeleportKey, { label: string; pos: LatLng; note: string }> = {
+  home: { label: "Home", pos: [28.5487, 77.234], note: "GK-1, M-Block" },
+  college: { label: "College", pos: [28.5459, 77.2732], note: "IIIT-Delhi, Okhla" },
+  market: { label: "Market", pos: [28.5677, 77.2433], note: "Lajpat Nagar Central Market" },
+  metro: { label: "Metro Station", pos: [28.5497, 77.2588], note: "Kalkaji Mandir Metro" },
+  unsafe: { label: "Unsafe area", pos: [28.5352, 77.2402], note: "Dark service lane off Outer Ring Road" },
+};
+
+export type SafePlace = { id: string; name: string; landmarkId: string; pos: LatLng; radius: number };
+export const DEFAULT_SAFE_PLACES: SafePlace[] = [
+  { id: "sp-home", name: "Home", landmarkId: "gk", pos: [28.5487, 77.234], radius: 250 },
+  { id: "sp-college", name: "College", landmarkId: "iiitd", pos: [28.5459, 77.2732], radius: 300 },
+  { id: "sp-hostel", name: "Hostel", landmarkId: "nsic", pos: [28.5546, 77.2649], radius: 250 },
+];

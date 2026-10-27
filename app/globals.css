@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* Design tokens as RGB channels so Tailwind opacity modifiers work (bg-pink-strong/20). */
-:root {
+:root, .os-light {
   --bg: 242 249 255;          /* #F2F9FF */
   --surface: 255 255 255;     /* #FFFFFF */
   --pink-soft: 255 204 225;   /* #FFCCE1 */
@@ -16,7 +16,7 @@
   --line: 230 234 242;
   color-scheme: light;
 }
-.dark {
+.dark, .os-dark {
   --bg: 17 15 25;
   --surface: 29 26 39;
   --pink-soft: 78 46 64;
@@ -46,7 +46,8 @@ body { font-size: 15px; -webkit-font-smoothing: antialiased; }
 .label { @apply text-sm font-medium text-muted; }
 }
 
-.dark .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9); }
+.dark .leaflet-tile-pane, .os-dark .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9); }
+.dark .os-light .leaflet-tile-pane { filter: none; }
 .leaflet-container { font-family: inherit; background: rgb(var(--bg)); }
 .leaflet-div-icon { background: transparent; border: 0; }
 
