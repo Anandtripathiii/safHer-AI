@@ -99,9 +99,8 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-1">
-          <label className="mr-1 flex cursor-pointer items-center gap-2 rounded-full px-2 py-1 text-xs font-medium text-muted hover:bg-pink-soft/40" title="Demo mode (Ctrl+Shift+D)">
+          <label className="flex cursor-pointer items-center gap-2 rounded-full px-2 py-1 text-xs font-medium text-muted hover:bg-pink-soft/40" title="Demo mode (Ctrl+Shift+D)">
             <span className="hidden sm:inline">Demo mode</span>
-            <span className="sm:hidden">Demo</span>
             <Switch checked={demoMode} onCheckedChange={(v) => set({ demoMode: v })} aria-label="Demo mode" />
           </label>
           <button className={cn(roundBtn, "hidden sm:grid")} onClick={() => setSearch(true)} aria-label="Search" title="Search (Ctrl+K)">

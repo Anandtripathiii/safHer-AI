@@ -9,7 +9,8 @@ import { cn } from "@/lib/utils";
 /** Presenter controls. Only visible while Demo mode is on. */
 export default function DemoPanel() {
   const s = useApp();
-  const [open, setOpen] = useState(true);
+  // Collapsed by default and after every trigger, so it never sits on top of the page's own controls.
+  const [open, setOpen] = useState(false);
   if (!s.demoMode) return null;
 
   const btn = "rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-medium text-ink transition hover:bg-pink-soft/60";
@@ -24,16 +25,16 @@ export default function DemoPanel() {
   ];
 
   return (
-    <div className="fixed bottom-24 left-3 z-[996] w-[min(300px,calc(100vw-96px))] md:bottom-6 md:left-6">
-      <div className="rounded-2xl border border-warning/50 bg-surface/95 p-3 shadow-md backdrop-blur">
+    <div className={cn("fixed bottom-24 left-3 z-[996] md:bottom-6 md:left-1/2 md:-translate-x-1/2", open ? "w-[min(300px,calc(100vw-96px))]" : "w-auto")}>
+      <div className={cn("rounded-2xl border border-warning/50 bg-surface/95 shadow-md backdrop-blur", open ? "p-3" : "px-3 py-2")}>
         <button onClick={() => setOpen(!open)} className="flex w-full items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted">
-          <FlaskConical size={16} className="text-warning" /> Presenter panel
-          <span className="ml-auto text-[10px] normal-case tracking-normal">journeys 10× faster</span>
+          <FlaskConical size={16} className="text-warning" /> Presenter
+          {open && <span className="ml-auto text-[10px] normal-case tracking-normal">journeys 10× faster</span>}
           <ChevronDown size={16} className={cn("transition", !open && "-rotate-90")} />
         </button>
         {open && (
           <div className="mt-3 flex flex-wrap gap-1.5">
-            {actions.map(([label, fn]) => <button key={label} className={btn} onClick={fn}>{label}</button>)}
+            {actions.map(([label, fn]) => <button key={label} className={btn} onClick={() => { fn(); setOpen(false); }}>{label}</button>)}
           </div>
         )}
       </div>

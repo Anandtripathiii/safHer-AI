@@ -44,7 +44,7 @@ export default function LiveMap({
 }: { routes?: MapRoute[]; me?: LatLng | null; destination?: LatLng; zones?: SafeZone[]; showHelp?: boolean; fitTo?: LatLng[]; padTop?: number; className?: string }) {
   return (
     <MapContainer center={[28.5455, 77.24]} zoom={14} zoomControl={false} className={className} attributionControl>
-      <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" />
       {fitTo && <Fit points={fitTo} padTop={padTop} />}
       {zones.map((z) => (
         <Circle key={z.id} center={z.pos} radius={z.radius} pathOptions={{ color: "#E195AB", fillColor: "#FFCCE1", fillOpacity: 0.35, weight: 1.5 }}>
