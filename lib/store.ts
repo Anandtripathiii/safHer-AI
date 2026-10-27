@@ -202,8 +202,8 @@ export const useApp = create<State & Actions>()(
           sharing: get().sharing ?? { startedAt: now, minutes: SHARE_MINUTES },
           risk: null, checkin: null, fall: null, minimized: false, minimizeAt: null,
         });
-        const evId = get().log({ type: "sos", title: `SOS — ${source}`, detail: "Alert in progress · recording started", status: "active", notified: contacts.filter((c) => !c.escalation).map((c) => c.name), battery: usePhone.getState().battery });
-        // Prefer the real device battery when the browser exposes it.
+        const evId = get().log({ type: "sos", title: `SOS — ${source}`, detail: "Alert in progress · recording started", status: "active", notified: contacts.filter((c) => !c.escalation).map((c) => c.name) });
+        // Real device battery only — the phone demo's simulated level must never reach website records.
         (navigator as Navigator & { getBattery?: () => Promise<{ level: number }> }).getBattery?.()
           .then((b) => get().updateEvent(evId, { battery: Math.round(b.level * 100) }))
           .catch(() => {});
