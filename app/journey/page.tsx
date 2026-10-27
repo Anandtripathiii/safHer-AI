@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { journeyOptions, landmark, useApp } from "@/lib/store";
 import { usePhone } from "@/lib/phone-state";
 import { defaultRouteKind, densify, pointAt, type RouteKind, type RouteScore } from "@/lib/simulation";
-import { useNow } from "@/lib/hooks";
+import { useMounted, useNow } from "@/lib/hooks";
 import { cn, fmtClock } from "@/lib/utils";
 import PlacePicker from "@/components/PlacePicker";
 import { useT } from "@/lib/i18n";
@@ -42,7 +42,9 @@ export default function JourneyPage() {
   const [notify, setNotify] = useState<string[]>(["mom", "priya"]);
   const [expanded, setExpanded] = useState(true);
   const judgeNight = usePhone((p) => p.night);
-  const night = judgeNight || isNight(now);
+  // Visitor's clock only after mount: the page was pre-rendered on a UTC build machine.
+  const mounted = useMounted();
+  const night = judgeNight || (mounted && isNight(now));
   const [kind, setKind] = useState<RouteKind>("safer");
   useEffect(() => setKind(defaultRouteKind(night)), [night, fromId, toId]);
 
