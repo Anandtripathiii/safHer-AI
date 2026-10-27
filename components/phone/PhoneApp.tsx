@@ -7,7 +7,8 @@ import { cn } from "@/lib/utils";
 import StatusBar from "../StatusBar";
 import HomeScreen from "./HomeScreen";
 import MapScreen from "./MapScreen";
-import { LocationPrompt, PhoneToast, Springboard } from "./PhoneSystem";
+import SosScreen from "./SosScreen";
+import { Decoy, LocationPrompt, PhoneToast, Springboard } from "./PhoneSystem";
 
 const TABS: { id: Tab; label: string; icon: typeof Home }[] = [
   { id: "home", label: "Home", icon: Home },
@@ -17,7 +18,7 @@ const TABS: { id: Tab; label: string; icon: typeof Home }[] = [
   { id: "profile", label: "Profile", icon: UserRound },
 ];
 
-const SCREENS: Partial<Record<Tab, () => JSX.Element>> = { home: HomeScreen, map: MapScreen };
+const SCREENS: Partial<Record<Tab, () => JSX.Element>> = { home: HomeScreen, map: MapScreen, sos: SosScreen };
 
 function TabBar() {
   const { tab, set, favourites, say } = usePhone();
@@ -80,10 +81,20 @@ function TabBar() {
 
 /** The SafeHer app as it runs on the phone: status bar, current screen and tab bar. */
 export default function PhoneApp() {
-  const { tab } = usePhone();
+  const { tab, fireSOS } = usePhone();
   const Screen = SCREENS[tab];
+  const taps = useRef<{ t: number; x: number; y: number }[]>([]);
+
+  // Silent SOS: three quick taps in roughly the same spot, anywhere on screen.
+  const onTap = (e: React.PointerEvent) => {
+    const now = Date.now();
+    const recent = taps.current.filter((p) => now - p.t < 700 && Math.hypot(p.x - e.clientX, p.y - e.clientY) < 40);
+    taps.current = [...recent, { t: now, x: e.clientX, y: e.clientY }];
+    if (taps.current.length >= 3) { taps.current = []; fireSOS("Silent triple-tap", true); }
+  };
+
   return (
-    <>
+    <div className="contents" onPointerDownCapture={onTap}>
       <StatusBar />
       {/* Not `relative`: in-app sheets position against the whole phone screen. */}
       <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
@@ -93,6 +104,7 @@ export default function PhoneApp() {
       <PhoneToast />
       <LocationPrompt />
       <Springboard />
-    </>
+      <Decoy />
+    </div>
   );
 }

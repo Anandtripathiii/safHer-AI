@@ -5,30 +5,12 @@ import { motion } from "framer-motion";
 import { Keyboard, Mic, MicOff, Smartphone, Vibrate } from "lucide-react";
 import { toast } from "sonner";
 import { useApp } from "@/lib/store";
-import { useNow } from "@/lib/hooks";
+import { useHold, useNow } from "@/lib/hooks";
 import { fmtClock } from "@/lib/utils";
 import { Waveform } from "@/components/Overlays";
 import { useCoordination, StatusPill } from "@/components/Coordination";
 
-const HOLD_MS = 2000;
-
 type Recognition = { continuous: boolean; interimResults: boolean; lang: string; start(): void; stop(): void; onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null; onend: (() => void) | null; onerror: ((e: { error: string }) => void) | null };
-
-function useHold(onDone: () => void) {
-  const [p, setP] = useState(0);
-  const start = useRef<number | null>(null);
-  const raf = useRef(0);
-  const tick = () => {
-    if (start.current === null) return;
-    const v = Math.min(1, (performance.now() - start.current) / HOLD_MS);
-    setP(v);
-    if (v >= 1) { start.current = null; onDone(); return; }
-    raf.current = requestAnimationFrame(tick);
-  };
-  const down = () => { if (start.current !== null) return; start.current = performance.now(); navigator.vibrate?.(30); raf.current = requestAnimationFrame(tick); };
-  const up = () => { start.current = null; cancelAnimationFrame(raf.current); setP(0); };
-  return { p, down, up };
-}
 
 export default function SosPage() {
   const { sos, safeWord, fireSOS, resolveSOS } = useApp();

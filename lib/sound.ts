@@ -55,3 +55,13 @@ export function playCallerVoice(name: string) {
   }
   return () => s.cancel();
 }
+
+/** Spoken confirmation, so she knows the alert went out without looking at the screen. */
+export function speak(text: string, lang = "en-IN") {
+  const s = typeof window !== "undefined" ? window.speechSynthesis : undefined;
+  if (!s) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = lang;
+  u.rate = 1;
+  s.speak(u);
+}

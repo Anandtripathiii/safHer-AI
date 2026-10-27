@@ -1,10 +1,10 @@
 "use client";
 // OS-level pieces of the phone: toasts, permission prompts and the minimised home screen.
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Calculator, Calendar, Camera, CheckCircle2, Info, MapPin, MessageCircle, Music, ShieldHalf, AlertTriangle, Siren } from "lucide-react";
 import { usePhone, MINIMIZE_SECONDS } from "@/lib/phone-state";
-import { useNow } from "@/lib/hooks";
+import { useHold, useNow } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
 import StatusBar from "../StatusBar";
 
@@ -103,5 +103,40 @@ export function Springboard() {
         {disguise ? "Running" : "SafeHer running"}
       </motion.button>
     </motion.div>
+  );
+}
+
+/**
+ * Decoy: looks like the phone died while SOS keeps recording and sharing.
+ * Holding the screen for 2 seconds brings SafeHer back.
+ */
+export function Decoy() {
+  const { decoy, set } = usePhone();
+  const [phase, setPhase] = useState<"dying" | "off">("dying");
+  const hold = useHold(() => set({ decoy: false }), 2000);
+  useEffect(() => {
+    if (!decoy) return;
+    setPhase("dying");
+    const t = setTimeout(() => setPhase("off"), 2600);
+    return () => clearTimeout(t);
+  }, [decoy]);
+  if (!decoy) return null;
+  return (
+    <div
+      className="absolute inset-0 z-[90] grid touch-none select-none place-items-center bg-black text-white"
+      onPointerDown={hold.down}
+      onPointerUp={hold.up}
+      onPointerLeave={hold.up}
+      onContextMenu={(e) => e.preventDefault()}
+      aria-label="Phone appears off. Hold for 2 seconds to return."
+    >
+      {phase === "dying" && (
+        <motion.div initial={{ opacity: 1 }} animate={{ opacity: [1, 1, 0] }} transition={{ duration: 2.6, times: [0, 0.75, 1] }} className="flex flex-col items-center gap-4">
+          <svg viewBox="0 0 60 28" className="w-24" aria-hidden><rect x="1" y="1" width="52" height="26" rx="6" fill="none" stroke="#fff" strokeOpacity=".6" strokeWidth="2" /><rect x="4" y="4" width="4" height="20" rx="2" fill="#E5484D" /><rect x="55" y="9" width="4" height="10" rx="2" fill="#fff" fillOpacity=".6" /></svg>
+          <p className="text-[15px] text-white/70">Shutting down…</p>
+        </motion.div>
+      )}
+      {hold.p > 0 && <span className="absolute bottom-10 h-1 rounded-full bg-white/30" style={{ width: `${hold.p * 120}px` }} />}
+    </div>
   );
 }
