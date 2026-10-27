@@ -8,6 +8,7 @@ import StatusBar from "../StatusBar";
 import HomeScreen from "./HomeScreen";
 import MapScreen from "./MapScreen";
 import SosScreen from "./SosScreen";
+import ContactsScreen from "./ContactsScreen";
 import { Decoy, LocationPrompt, PhoneToast, Springboard } from "./PhoneSystem";
 
 const TABS: { id: Tab; label: string; icon: typeof Home }[] = [
@@ -18,7 +19,7 @@ const TABS: { id: Tab; label: string; icon: typeof Home }[] = [
   { id: "profile", label: "Profile", icon: UserRound },
 ];
 
-const SCREENS: Partial<Record<Tab, () => JSX.Element>> = { home: HomeScreen, map: MapScreen, sos: SosScreen };
+const SCREENS: Partial<Record<Tab, () => JSX.Element>> = { home: HomeScreen, map: MapScreen, sos: SosScreen, contacts: ContactsScreen };
 
 function TabBar() {
   const { tab, set, favourites, say } = usePhone();
@@ -97,7 +98,7 @@ export default function PhoneApp() {
     <div className="contents" onPointerDownCapture={onTap}>
       <StatusBar />
       {/* Not `relative`: in-app sheets position against the whole phone screen. */}
-      <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+      <main className="no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain">
         {Screen ? <Screen /> : <div className="p-5 text-muted">Loading…</div>}
       </main>
       <TabBar />

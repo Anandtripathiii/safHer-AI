@@ -39,7 +39,7 @@ type State = {
   disguise: boolean;
   revealed: boolean;
   locPerm: "unasked" | "once" | "while" | "denied";
-  contactsPerm: "unasked" | "granted" | "denied";
+  contactsPerm: "unasked" | "asking" | "granted" | "denied";
   favourites: string[];
   safePlaces: SafePlace[];
   here: LatLng;

@@ -63,3 +63,7 @@ body { font-size: 15px; -webkit-font-smoothing: antialiased; }
 @keyframes in-bottom { from { transform: translateY(100%) } to { transform: none } }
 .sheet-in-right[data-state="open"] { animation: in-right 220ms ease-out; }
 .sheet-in-bottom[data-state="open"] { animation: in-bottom 220ms ease-out; }
+
+/* Phone screens scroll like a phone: no desktop scrollbar. */
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
