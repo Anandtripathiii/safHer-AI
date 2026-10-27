@@ -29,6 +29,7 @@ export type Journey = {
 export type SOS = { id: string; startedAt: number; source: string; weak: boolean };
 export type Evidence = { id: string; ts: number; durationSec: number; source: string };
 export type Risk = RiskScenario & { at: number };
+export type WebLocation = { status: "idle" | "asking" | "granted" | "denied"; lat?: number; lng?: number; acc?: number; at?: number };
 
 export const CHECKIN_EVERY = 120_000;
 export const CHECKIN_REPLY_WINDOW = 30_000;
@@ -62,6 +63,7 @@ type State = {
   fall: { since: number } | null;
   fakeCallAt: number | null;
   call: { phase: "ringing" | "answered"; since: number } | null;
+  webLoc: WebLocation;
 };
 
 type Actions = {
@@ -84,6 +86,7 @@ type Actions = {
   markHelpful: (id: string) => void;
   addZone: (z: Omit<SafeZone, "id">) => void;
   removeZone: (id: string) => void;
+  requestLocation: () => void;
   reset: () => void;
 };
 
@@ -116,6 +119,7 @@ const initial = (): State => {
     fall: null,
     fakeCallAt: null,
     call: null,
+    webLoc: { status: "idle" },
   };
 };
 
@@ -229,9 +233,25 @@ export const useApp = create<State & Actions>()(
       addZone: (z) => set((s) => ({ zones: [...s.zones, { ...z, id: uid() }] })),
       removeZone: (id) => set((s) => ({ zones: s.zones.filter((z) => z.id !== id) })),
 
+      // One reading on request. No background tracking.
+      requestLocation: () => {
+        if (!("geolocation" in navigator)) return set({ webLoc: { status: "denied" } });
+        set({ webLoc: { ...get().webLoc, status: "asking" } });
+        navigator.geolocation.getCurrentPosition(
+          (p) => set({ webLoc: { status: "granted", lat: p.coords.latitude, lng: p.coords.longitude, acc: Math.round(p.coords.accuracy), at: Date.now() } }),
+          (e) => set({ webLoc: { status: e.code === e.PERMISSION_DENIED ? "denied" : "idle" } }),
+          { enableHighAccuracy: true, timeout: 10_000 },
+        );
+      },
+
       reset: () => set({ ...initial(), theme: get().theme }),
     }),
-    { name: "safeher", skipHydration: true },
+    {
+      name: "safeher",
+      skipHydration: true,
+      // Never write real coordinates to storage; only whether permission was granted or denied.
+      partialize: (s) => ({ ...s, webLoc: { status: s.webLoc.status === "asking" ? "idle" : s.webLoc.status } }),
+    },
   ),
 );
 

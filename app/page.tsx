@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowRight, BellRing, Route, UsersRound } from "lucide-react";
 import { useApp } from "@/lib/store";
+import LocationPill from "@/components/LocationPill";
 
 function Illustration() {
   return (
@@ -49,7 +50,10 @@ export default function Landing() {
     <main className="mx-auto max-w-5xl px-5 pb-36 pt-32 md:pb-24 md:pt-40">
       <section className="grid items-center gap-12 md:grid-cols-[1.15fr_1fr]">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, ease: "easeOut" }}>
-          <p className="text-sm font-medium text-pink-strong">Good evening, Anand</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <p className="text-sm font-medium text-pink-strong">Good evening, Anand</p>
+            <LocationPill />
+          </div>
           <h1 className="mt-4 font-serif text-[44px] leading-[1.05] tracking-tight text-ink md:text-[64px]">
             Get home feeling <em className="text-pink-strong">looked after</em>.
           </h1>
