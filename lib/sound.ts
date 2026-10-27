@@ -66,33 +66,94 @@ export function startRingtone() {
   return () => clearInterval(id);
 }
 
-/** A ~15 second "voice clip" for the fake call, spoken by the browser's speech engine. */
+// ---------- Voices ----------
+// Malenia (assistant) and the fake caller use two different female voices where the device has them.
+
+const FEMALE_NAMES: Record<string, string[]> = {
+  en: ["heera", "neerja", "veena", "priya", "google uk english female", "aria", "zira", "samantha", "female"],
+  hi: ["kalpana", "swara", "google हिन्दी", "lekha", "female"],
+  bn: ["google বাংলা", "tanishaa", "female"],
+};
+const LANG_ORDER: Record<string, string[]> = { en: ["en-in", "en-gb", "en"], hi: ["hi-in", "hi"], bn: ["bn-in", "bn"] };
+
+/** Voices load asynchronously; wait for `voiceschanged` (max 1.5 s). */
+function loadVoices(): Promise<SpeechSynthesisVoice[]> {
+  const s = typeof window !== "undefined" ? window.speechSynthesis : undefined;
+  if (!s) return Promise.resolve([]);
+  const now = s.getVoices();
+  if (now.length) return Promise.resolve(now);
+  return new Promise((resolve) => {
+    const done = () => { s.removeEventListener("voiceschanged", done); resolve(s.getVoices()); };
+    s.addEventListener("voiceschanged", done);
+    setTimeout(done, 1500);
+  });
+}
+
+const isFemale = (v: SpeechSynthesisVoice) => /female/i.test(v.name) || (v as unknown as { gender?: string }).gender === "female";
+
+/** Best female voice for a language, skipping `except`: name priority first, then any voice marked female. */
+export function pickFemaleVoice(voices: SpeechSynthesisVoice[], langCode: string, except?: SpeechSynthesisVoice | null) {
+  const base = langCode.slice(0, 2).toLowerCase();
+  const order = LANG_ORDER[base] ?? [base];
+  const rank = (v: SpeechSynthesisVoice) => order.findIndex((o) => v.lang.toLowerCase().replace("_", "-").startsWith(o));
+  const inLang = voices.filter((v) => v !== except && rank(v) >= 0).sort((x, y) => rank(x) - rank(y));
+  for (const hint of FEMALE_NAMES[base] ?? ["female"]) {
+    const hit = inLang.find((v) => v.name.toLowerCase().includes(hint));
+    if (hit) return hit;
+  }
+  return inLang.find(isFemale) ?? voices.find((v) => v !== except && isFemale(v)) ?? null;
+}
+
+let assistantVoice: SpeechSynthesisVoice | null = null;
+type Role = "assistant" | "caller";
+
+async function voiceFor(role: Role, langCode: string) {
+  const voices = await loadVoices();
+  const mine = pickFemaleVoice(voices, langCode);
+  if (role === "assistant") {
+    assistantVoice = mine;
+    if (!mine) console.warn(`[SafeHer] No female voice for ${langCode} on this device — using the default voice.`);
+    return mine ? { voice: mine, rate: 0.95, pitch: 0.9 } : { voice: null, rate: 0.95, pitch: 0.85 };
+  }
+  // Caller: a different female voice from Malenia's when the device has one; otherwise reshape the same voice.
+  const malenia = assistantVoice ?? mine;
+  const other = pickFemaleVoice(voices, langCode, malenia);
+  if (other && other !== malenia) return { voice: other, rate: 0.9, pitch: 1.0 };
+  if (mine) return { voice: mine, rate: 1.0, pitch: 1.1 };
+  console.warn(`[SafeHer] No female voice for ${langCode} on this device — fake call uses the default voice.`);
+  return { voice: null, rate: 0.9, pitch: 0.85 };
+}
+
+async function say(role: Role, lines: string[], langCode: string) {
+  const s = typeof window !== "undefined" ? window.speechSynthesis : undefined;
+  if (!s) return;
+  const { voice, rate, pitch } = await voiceFor(role, langCode);
+  for (const l of lines) {
+    const u = new SpeechSynthesisUtterance(l);
+    u.lang = voice?.lang ?? langCode;
+    if (voice) u.voice = voice;
+    u.rate = rate;
+    u.pitch = pitch;
+    u.volume = 1;
+    s.speak(u);
+  }
+}
+
+/** A ~15 second "voice clip" for the fake call: a worried mother, not the assistant. */
 export function playCallerVoice(name: string) {
   const s = typeof window !== "undefined" ? window.speechSynthesis : undefined;
   if (!s) return () => {};
-  const lines = [
+  s.cancel();
+  void say("caller", [
     `Hello beta? Haan, it's ${name}.`,
     "Where are you right now? I'm waiting near the gate.",
     "Okay, okay. Just stay on the phone with me, I'll come and pick you up.",
     "Tell me when you can see the main road. I'm leaving now.",
-  ];
-  s.cancel();
-  for (const l of lines) {
-    const u = new SpeechSynthesisUtterance(l);
-    u.lang = "en-IN";
-    u.rate = 0.95;
-    u.pitch = 1.1;
-    s.speak(u);
-  }
+  ], "en-IN");
   return () => s.cancel();
 }
 
-/** Spoken confirmation, so she knows the alert went out without looking at the screen. */
+/** Malenia's voice: spoken confirmations and assistant replies. */
 export function speak(text: string, lang = "en-IN") {
-  const s = typeof window !== "undefined" ? window.speechSynthesis : undefined;
-  if (!s) return;
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = lang;
-  u.rate = 1;
-  s.speak(u);
+  void say("assistant", [text], lang);
 }

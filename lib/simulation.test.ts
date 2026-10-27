@@ -3,6 +3,7 @@ import { CONTACTS, ROUTE_WAYPOINTS } from "./seed.ts";
 import { matchQA } from "./assistant.ts";
 import { calculate } from "./calc.ts";
 import { heardSafeWord } from "./voice.ts";
+import { pickFemaleVoice } from "./sound.ts";
 import { routeScores, routesFor } from "./simulation.ts";
 import { coordinationAt, coordinationScript, pointAt, NO_RESPONSE_AFTER } from "./simulation.ts";
 
@@ -53,4 +54,12 @@ assert.ok(heardSafeWord("ok so I want a PINEAPPLE juice", "pineapple"));
 assert.ok(heardSafeWord("call me on the blue umbrella line", "Blue Umbrella"));
 assert.ok(!heardSafeWord("help me", "pineapple"));
 assert.ok(!heardSafeWord("anything", "   "));
+// female voice picker: language + name priority, a different voice for the caller, null when none exist
+const V = (name: string, lang: string) => ({ name, lang }) as SpeechSynthesisVoice;
+const voices = [V("Microsoft David", "en-US"), V("Microsoft Ravi", "en-IN"), V("Microsoft Zira", "en-US"), V("Microsoft Heera", "en-IN"), V("Google UK English Female", "en-GB"), V("Microsoft Kalpana", "hi-IN")];
+const malenia = pickFemaleVoice(voices, "en-IN")!;
+assert.equal(malenia.name, "Microsoft Heera");
+assert.equal(pickFemaleVoice(voices, "en-IN", malenia)!.name, "Google UK English Female");
+assert.equal(pickFemaleVoice(voices, "hi-IN")!.name, "Microsoft Kalpana");
+assert.equal(pickFemaleVoice([V("Microsoft David", "en-US")], "en-IN"), null);
 console.log("simulation tests passed");
