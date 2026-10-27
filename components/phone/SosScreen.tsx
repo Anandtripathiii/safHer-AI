@@ -10,7 +10,7 @@ import { speak } from "@/lib/sound";
 import { cn, fmtClock } from "@/lib/utils";
 import { StatusPill } from "../Coordination";
 import { Waveform } from "../Overlays";
-import { LocationOffBanner } from "../SafetyBanners";
+import { BatteryBanner, LocationOffBanner } from "../SafetyBanners";
 import { Avatar, pbtn } from "./ui";
 
 /** Live status of everyone alerted, favourites first. Shared by the SOS screen and Mom's view. */
@@ -52,6 +52,7 @@ export default function SosScreen() {
             <p className="text-[14px] text-white/60">{s.sos.source} · {fmtClock(elapsed)}</p>
           </div>
         </div>
+        <BatteryBanner level={s.battery} className="mt-4" />
         <div className="mt-4 flex items-center gap-2 rounded-2xl bg-white/[0.08] px-4 py-3 text-[15px] font-semibold">
           <span className="h-3 w-3 animate-pulse rounded-full bg-danger" /> Recording {fmtClock(elapsed)}
           <Waveform bars={12} className="ml-auto h-6 text-white/70" />

@@ -5,6 +5,7 @@ import PhoneFrame from "@/components/PhoneFrame";
 import PhoneApp from "@/components/phone/PhoneApp";
 import PhoneEngine from "@/components/phone/PhoneEngine";
 import JudgeControls from "@/components/JudgeControls";
+import WatcherPhone from "@/components/phone/WatcherPhone";
 
 export default function PhoneDemoPage() {
   const { osDark, pulse, fireSOS } = usePhone();
@@ -14,14 +15,18 @@ export default function PhoneDemoPage() {
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-6xl flex-col items-center gap-8 px-4 pb-32 pt-28 lg:flex-row lg:items-start lg:justify-center lg:gap-12 md:pb-16">
-      <div className="flex flex-col items-center">
+      {/* Sticky on desktop so the phone stays in view while judges scroll the controls. */}
+      <div className="flex flex-col items-center lg:sticky lg:top-24">
         <PhoneEngine />
         <PhoneFrame dark={osDark} pulse={pulse} onPowerHold={() => fireSOS("Side button held", true)}>
           <PhoneApp />
         </PhoneFrame>
         <p className="mt-4 max-w-sm text-center text-xs text-muted">Simulated phone. Nothing here touches your real contacts, location or battery.</p>
       </div>
-      <JudgeControls />
+      <div className="flex w-full max-w-sm flex-col items-center gap-6">
+        <WatcherPhone />
+        <JudgeControls />
+      </div>
     </main>
   );
 }

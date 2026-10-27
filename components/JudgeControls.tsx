@@ -158,7 +158,7 @@ function ScenarioGroup() {
 /** Right-hand panel on /phone-demo: every simulated state, grouped. */
 export default function JudgeControls() {
   return (
-    <aside className="card w-full max-w-sm divide-y divide-line/70 p-5 lg:sticky lg:top-28">
+    <aside className="card w-full divide-y divide-line/70 p-5">
       <div className="pb-4">
         <h2 className="text-lg font-semibold">Judge controls</h2>
         <p className="text-sm text-muted">Change the phone's world. Everything is simulated.</p>
