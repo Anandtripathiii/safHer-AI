@@ -11,6 +11,8 @@ import { Waveform } from "@/components/Overlays";
 import { useCoordination, StatusPill } from "@/components/Coordination";
 import { useT } from "@/lib/i18n";
 import { useSafeWordListener } from "@/lib/voice";
+import AudioUnlock from "@/components/AudioUnlock";
+import { unlockAudio } from "@/lib/sound";
 
 
 export default function SosPage() {
@@ -63,6 +65,7 @@ export default function SosPage() {
       <div className="mx-auto flex max-w-md flex-col items-center">
         {!sos ? (
           <>
+            <AudioUnlock className="mb-6" />
             <h1 className="text-center text-2xl font-semibold">{tr("holdSos")}</h1>
             <p className="mt-2 text-center text-sm text-white/60">Your trusted contacts get your live location. Release to cancel.</p>
             {voiceOn && voice.status === "listening" && (
@@ -76,7 +79,7 @@ export default function SosPage() {
                 <circle cx="136" cy="136" r={r} fill="none" stroke="#fff" strokeWidth="10" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - hold.p)} />
               </svg>
               <motion.button
-                onPointerDown={(e) => { (e.target as HTMLElement).setPointerCapture?.(e.pointerId); hold.down(); }}
+                onPointerDown={(e) => { (e.target as HTMLElement).setPointerCapture?.(e.pointerId); unlockAudio(); hold.down(); }}
                 onPointerUp={hold.up}
                 onPointerCancel={hold.up}
                 onPointerLeave={hold.up}

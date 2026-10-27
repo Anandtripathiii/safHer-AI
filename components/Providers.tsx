@@ -8,6 +8,7 @@ import DemoPanel from "./DemoPanel";
 import QuickActions from "./QuickActions";
 import WebBanners from "./WebBanners";
 import { usePhone } from "@/lib/phone-state";
+import { unlockAudio } from "@/lib/sound";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const theme = useApp((s) => s.theme);
@@ -16,6 +17,11 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     useApp.persist.rehydrate();
     usePhone.persist.rehydrate(); // favourites + imported contacts are shared with the website
+  }, []);
+  // First tap anywhere unlocks sound for the whole visit (mobile browsers block audio until then).
+  useEffect(() => {
+    window.addEventListener("pointerdown", unlockAudio, { once: true });
+    return () => window.removeEventListener("pointerdown", unlockAudio);
   }, []);
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");

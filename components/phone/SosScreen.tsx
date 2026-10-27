@@ -12,6 +12,8 @@ import { StatusPill } from "../Coordination";
 import { Waveform } from "../Overlays";
 import { BatteryBanner, LocationOffBanner } from "../SafetyBanners";
 import { Avatar, pbtn } from "./ui";
+import AudioUnlock from "../AudioUnlock";
+import { unlockAudio } from "@/lib/sound";
 
 /** Live status of everyone alerted, favourites first. Shared by the SOS screen and Mom's view. */
 export function usePhoneCoordination() {
@@ -92,6 +94,7 @@ export default function SosScreen() {
     <div className="flex min-h-full flex-col items-center bg-[#1a1220] px-4 pb-6 pt-4 text-white">
       {s.locPerm === "denied" && <LocationOffBanner className="mb-3 w-full bg-white/10 text-white" />}
       {s.battery < 10 && <p className="mb-3 flex w-full items-center gap-2 rounded-2xl bg-danger px-4 py-3 text-[15px] font-bold"><BatteryWarning size={22} />Critical battery — your last location will auto-send</p>}
+      <AudioUnlock className="mb-4" />
       <h2 className="text-center text-[24px] font-bold leading-tight">Press and hold<br />for 2 seconds</h2>
       <p className="mt-2 text-center text-[15px] text-white/60">Release to cancel</p>
       <p className="mt-3 rounded-full bg-white/10 px-4 py-2 text-[15px] font-semibold">Listening for: “{safeWord}”</p>
@@ -101,7 +104,7 @@ export default function SosScreen() {
           <circle cx="144" cy="144" r={r} fill="none" stroke="#fff" strokeWidth="12" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - hold.p)} />
         </svg>
         <motion.button
-          onPointerDown={(e) => { (e.target as HTMLElement).setPointerCapture?.(e.pointerId); hold.down(); }}
+          onPointerDown={(e) => { (e.target as HTMLElement).setPointerCapture?.(e.pointerId); unlockAudio(); hold.down(); }}
           onPointerUp={hold.up}
           onPointerCancel={hold.up}
           onContextMenu={(e) => e.preventDefault()}

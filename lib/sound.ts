@@ -1,6 +1,37 @@
 // Synthesised with Web Audio so we ship no audio files.
 let ctx: AudioContext | null = null;
-const ac = () => (ctx ??= new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)());
+const ac = () => {
+  ctx ??= new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+  if (ctx.state === "suspended") void ctx.resume();
+  return ctx;
+};
+
+// 44-byte silent WAV: playing it inside a tap unlocks HTMLAudioElement playback on iOS/Android.
+const SILENT_WAV = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=";
+let unlocked = false;
+
+export const audioUnlocked = () => {
+  if (unlocked) return true;
+  try { return sessionStorage.getItem("safeher-audio") === "1"; } catch { return false; }
+};
+
+/**
+ * Mobile browsers only allow sound after a user gesture. Call this from a tap:
+ * it primes the audio element, Web Audio (chime, ringtone) and speech (voice confirmation, fake call).
+ */
+export function unlockAudio() {
+  try { const el = new Audio(SILENT_WAV); el.volume = 0; void el.play().catch(() => {}); } catch {}
+  try {
+    const a = ac();
+    const src = a.createBufferSource();
+    src.buffer = a.createBuffer(1, 1, 22050);
+    src.connect(a.destination);
+    src.start(0);
+  } catch {}
+  try { const u = new SpeechSynthesisUtterance(" "); u.volume = 0; window.speechSynthesis?.speak(u); } catch {}
+  unlocked = true;
+  try { sessionStorage.setItem("safeher-audio", "1"); } catch {}
+}
 
 function tone(freq: number, start: number, dur: number, gain = 0.08) {
   const a = ac();
