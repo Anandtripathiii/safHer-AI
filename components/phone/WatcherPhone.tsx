@@ -13,10 +13,13 @@ import { Avatar } from "./ui";
 
 const LiveMap = dynamic(() => import("@/components/LiveMap"), { ssr: false, loading: () => <div className="h-full w-full bg-pink-soft/20" /> });
 
-/** "Walk with me": a trusted contact's phone, watching the same journey live. */
-export default function WatcherPhone() {
+/**
+ * A trusted contact's phone mirroring the journey live.
+ * "Walk with me" = someone watching from home; `group` = a friend on the same shared trip.
+ */
+export default function WatcherPhone({ contactId = "mom", group = false, scale = 0.5 }: { contactId?: string; group?: boolean; scale?: number }) {
   const s = usePhone();
-  const watcher = useApp((x) => x.contacts[0]);
+  const watcher = useApp((x) => x.contacts.find((c) => c.id === contactId) ?? x.contacts[0]);
   const now = useNow(1000);
   const me = phonePosition(s);
   const live = !!(s.journey || s.sos || s.followed);
@@ -24,14 +27,14 @@ export default function WatcherPhone() {
 
   return (
     <div className="flex flex-col items-center">
-      <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">{watcher?.name ?? "Mom"}'s phone · Walk with me</p>
-      <PhoneFrame scale={0.5} tilt={false}>
+      <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">{watcher?.name ?? "Mom"}'s view · {group ? "Group journey" : "Walk with me"}</p>
+      <PhoneFrame scale={scale} tilt={false}>
         <StatusBar />
         <div className="flex items-center gap-3 px-5 pb-3">
           <Avatar initials="AN" color="#E195AB" size={52} />
           <div className="min-w-0">
             <p className="text-[20px] font-bold">Anand</p>
-            <p className="text-[15px] text-muted">{live ? "Sharing live location with you" : "Not sharing right now"}</p>
+            <p className="text-[15px] text-muted">{group ? (live ? "Walking together · one shared trip" : "Join Anand's next trip as a group") : live ? "Sharing live location with you" : "Not sharing right now"}</p>
           </div>
         </div>
         {s.sos && (
